@@ -1,0 +1,39 @@
+name: Left4Chat
+main: me.sisko.left4chat.Main
+version: 1.6
+api-version: 1.14
+depend: [Vault, Nicky]
+commands:
+  discord:
+    description: Syncs with Left4Craft Discord
+    usage: /discord [code]
+  announce:
+    description: Sends a message to the entire network
+    usage: /announce <message>
+  game:
+    description: Opens a GUI to change servers
+    usage: /game
+  msg:
+    description: Messages other players cross-server
+    usage: /msg <player> <message>
+    aliases: [m, tell, pm, message, w, whisper]
+  reply:
+    description: Replies to the last recieved message
+    usage: /reply <message>
+    aliases: [r]
+  afk:
+    description: Toggles afk status
+    usage: /afk
+  ggivecosmetic:
+    description: Global give cosmetic command
+    usage: /ggivecosmetic <name> <amount> [tier]
+  verify:
+    description: Verifies a user account
+    usage: /verify
+  chatlock:
+    description: Locks down the chat, requiring everyone to verify
+    usage: /chatlock
+  chatreload:
+    description: Reloads the Left4Chat plugin
+    usage: /chatreload
+    
