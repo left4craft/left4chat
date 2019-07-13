@@ -39,7 +39,7 @@ implements CommandExecutor {
                     }
                 }
                 catch (ArrayIndexOutOfBoundsException e) {
-                    p.sendMessage( r.RED + "Invalid Code");
+                    p.sendMessage(ChatColor.RED + "Invalid Code");
                     return true;
                 }
                 String discordID = (String)codes.get(args[0]);

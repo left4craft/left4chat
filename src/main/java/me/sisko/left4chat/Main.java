@@ -37,7 +37,6 @@ import org.bukkit.SoundCategory;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -193,7 +192,7 @@ implements Listener {
         if (name == null) {
             name = e.getPlayer().getName();
         }
-        name = ChatColor.translateAlternateColorCodes((char)'&', (String)name);
+        name = ChatColor.translateAlternateColorCodes('&', name);
         j.publish("minecraft.chat.global.out", "**" + e.getPlayer().getUniqueId() + "**[" + group + "] " + ChatColor.stripColor((String)(String.valueOf(name) + "** " + e.getMessage())).replaceAll("&.", ""));
         String message = e.getMessage();
         if (!perms.has(e.getPlayer(), "left4chat.format")) {
@@ -205,7 +204,7 @@ implements Listener {
                     }
                 }
             } else {
-                message = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)message));
+                message = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', message));
             }
         }
         j.publish("minecraft.chat.global.in", String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + ChatColor.RESET + " " + message);
@@ -362,7 +361,7 @@ implements Listener {
             jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is now afk.");
             perms.playerAdd(p, "harbor.bypass");
         }
-        jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(HumanEntity::getName).collect(Collectors.toList())));
+        jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
         jedis.close();
     }
 
@@ -371,21 +370,17 @@ implements Listener {
         Jedis jedis = new Jedis();
         if (afk && !afkPlayers.contains(p)) {
             afkPlayers.add(p);
-            jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(HumanEntity::getName).collect(Collectors.toList())));
+            jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
-            }
-            if (verbose) {
                 jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is now afk.");
             }
             perms.playerAdd(p, "harbor.bypass");
         } else if (!afk && afkPlayers.contains(p)) {
             afkPlayers.remove(p);
-            jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(HumanEntity::getName).collect(Collectors.toList())));
+            jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
-            }
-            if (verbose) {
                 jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is no longer afk.");
             }
             perms.playerRemove(p, "harbor.bypass");
