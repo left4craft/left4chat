@@ -10,11 +10,11 @@ import redis.clients.jedis.Jedis;
 
 public class GGiveCosmeticCommand
 implements CommandExecutor {
-    
+
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String str, String[] args) {
         if (sender instanceof Player) {
-            ((Player)sender).sendMessage((Object)ChatColor.RED + "Insufficient Permission");
+            ((Player)sender).sendMessage(ChatColor.RED + "Insufficient Permission");
         } else if (args.length < 2) {
             Main.plugin.getLogger().info("Usage: /ggivecosmetic <name> <amount> [tier]");
         } else {

@@ -24,12 +24,12 @@ implements CommandExecutor {
         }
         Player p = (Player)sender;
         if (!Main.plugin.getPerms().has(p, "left4chat.verified")) {
-            p.sendMessage((Object)ChatColor.RED + "You must verify with " + (Object)ChatColor.GOLD + "/verify" + (Object)ChatColor.RED + " to message other players!");
+            p.sendMessage(ChatColor.RED + "You must verify with " + ChatColor.GOLD + "/verify" + ChatColor.RED + " to message other players!");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
             return true;
         }
         if (args.length < 2) {
-            p.sendMessage((Object)ChatColor.RED + "Usage: /" + label + " <player> <message>");
+            p.sendMessage(ChatColor.RED + "Usage: /" + label + " <player> <message>");
             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
         } else {
             String reciever = args[0];
@@ -73,18 +73,18 @@ implements CommandExecutor {
             possibleUsers.clear();
             possibleUsers.addAll(set);
             if (possibleUsers.size() == 0) {
-                p.sendMessage((Object)ChatColor.RED + "No usernames or nicknames start with " + reciever + ".");
+                p.sendMessage(ChatColor.RED + "No usernames or nicknames start with " + reciever + ".");
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
             } else {
                 if (possibleUsers.size() == 1) {
                     this.sendMessage(p, (String)possibleUsers.get(0), message);
                     return true;
                 }
-                String error = (Object)ChatColor.RED + "Ambiguous recipient \"" + reciever + "\", do you mean: \n";
+                String error = ChatColor.RED + "Ambiguous recipient \"" + reciever + "\", do you mean: \n";
                 for (String possible : possibleUsers) {
-                    error = String.valueOf(error) + (Object)ChatColor.GOLD + "- " + possible;
+                    error = String.valueOf(error) + ChatColor.GOLD + "- " + possible;
                     if (usernameNickname.containsKey(possible)) {
-                        error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(possible))) + (Object)ChatColor.GOLD + ")";
+                        error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(possible))) + ChatColor.GOLD + ")";
                     }
                     error = String.valueOf(error) + "\n";
                 }
@@ -123,7 +123,7 @@ implements CommandExecutor {
                 afk = true;
             }
             if (afk) {
-                p.sendMessage((Object)ChatColor.RED + nick + (Object)ChatColor.RED + " is currently AFK and may not respond.");
+                p.sendMessage(ChatColor.RED + nick + ChatColor.RED + " is currently AFK and may not respond.");
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
             } else {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 2.0f);
@@ -133,7 +133,7 @@ implements CommandExecutor {
             return;
         }
         j.close();
-        p.sendMessage((Object)ChatColor.RED + "Error: " + name + " is not online.");
+        p.sendMessage(ChatColor.RED + "Error: " + name + " is not online.");
     }
 }
 

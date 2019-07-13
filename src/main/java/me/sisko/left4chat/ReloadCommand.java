@@ -14,7 +14,7 @@ implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
         if (sender instanceof Player) {
-            sender.sendMessage((Object)ChatColor.RED + "You don't have permission to do that!");
+            sender.sendMessage(ChatColor.RED + "You don't have permission to do that!");
         } else {
             ConfigManager.reload();
             Main.getPlugin().getLogger().info("Config and database has been reloaded");

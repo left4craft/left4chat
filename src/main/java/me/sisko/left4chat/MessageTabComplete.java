@@ -30,7 +30,7 @@ implements TabCompleter {
             }
             tabComplete.removeIf(s -> !s.toLowerCase().startsWith(args[0].toLowerCase()));
             if (tabComplete.size() == 0) {
-                tabComplete.add((Object)ChatColor.RED + "No usernames or nicknames start with " + args[0] + "!");
+                tabComplete.add(ChatColor.RED + "No usernames or nicknames start with " + args[0] + "!");
             }
             return tabComplete;
         }

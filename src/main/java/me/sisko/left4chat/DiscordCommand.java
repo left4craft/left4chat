@@ -23,7 +23,7 @@ implements CommandExecutor {
             } else {
                 String tempJson = Main.getCodes();
                 if (tempJson == null) {
-                    p.sendMessage((Object)ChatColor.RED + "Failed to connect to the discord bot.");
+                    p.sendMessage(ChatColor.RED + "Failed to connect to the discord bot.");
                     return true;
                 }
                 Main.plugin.getLogger().info(tempJson);
@@ -39,7 +39,7 @@ implements CommandExecutor {
                     }
                 }
                 catch (ArrayIndexOutOfBoundsException e) {
-                    p.sendMessage((Object)ChatColor.RED + "Invalid Code");
+                    p.sendMessage( r.RED + "Invalid Code");
                     return true;
                 }
                 String discordID = (String)codes.get(args[0]);
@@ -50,10 +50,10 @@ implements CommandExecutor {
                     j.set("discord.synccodes", new JSONObject(codes).toJSONString());
                     new AsyncUserSave().setup(Main.getSQL(), p.getUniqueId().toString(), p.getName(), discordID).runTaskAsynchronously((Plugin)Main.plugin);
                     new AsyncUserUpdate().setup(Main.getSQL(), p).runTaskLaterAsynchronously((Plugin)Main.plugin, 40L);
-                    p.sendMessage((Object)ChatColor.GREEN + "Successfully synced to discord account " + discordID);
+                    p.sendMessage(ChatColor.GREEN + "Successfully synced to discord account " + discordID);
                     j.close();
                 } else {
-                    p.sendMessage((Object)ChatColor.RED + "Invalid code.");
+                    p.sendMessage(ChatColor.RED + "Invalid code.");
                 }
             }
         } else {

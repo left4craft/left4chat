@@ -24,7 +24,7 @@ implements CommandExecutor {
             return true;
         }
         if (args.length < 1) {
-            p.sendMessage((Object)ChatColor.RED + "Usage: /" + label + " <message>");
+            p.sendMessage(ChatColor.RED + "Usage: /" + label + " <message>");
         } else {
             String name = p.getName();
             Jedis j = new Jedis();
@@ -41,10 +41,10 @@ implements CommandExecutor {
                 }
             }
             catch (ArrayIndexOutOfBoundsException e) {
-                p.sendMessage((Object)ChatColor.RED + "Invalid JSON in minecraft.chat.replies");
+                p.sendMessage(ChatColor.RED + "Invalid JSON in minecraft.chat.replies");
             }
             if (!replies.containsKey(name)) {
-                p.sendMessage((Object)ChatColor.RED + "There is nobody to whom you can reply.");
+                p.sendMessage(ChatColor.RED + "There is nobody to whom you can reply.");
             } else {
                 for (String player : j.get("minecraft.players").split(",")) {
                     if (!player.split(" ")[0].equalsIgnoreCase((String)replies.get(name))) continue;
@@ -57,7 +57,7 @@ implements CommandExecutor {
                     j.close();
                     return true;
                 }
-                p.sendMessage((Object)ChatColor.RED + (String)replies.get(name) + " is currently offline.");
+                p.sendMessage(ChatColor.RED + (String)replies.get(name) + " is currently offline.");
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
             }
             j.close();

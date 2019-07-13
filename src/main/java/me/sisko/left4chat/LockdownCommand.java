@@ -19,7 +19,7 @@ implements CommandExecutor {
         if (sender instanceof Player) {
             name = ((Player)sender).getName();
             if (!Main.plugin.getPerms().has(sender, "left4chat.chatlock")) {
-                sender.sendMessage((Object)ChatColor.RED + "You don't have permission to lock chat!");
+                sender.sendMessage(ChatColor.RED + "You don't have permission to lock chat!");
                 j.close();
                 return true;
             }

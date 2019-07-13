@@ -33,7 +33,7 @@ implements CommandExecutor {
         } else {
             Player p = (Player)sender;
             if (Main.plugin.getPerms().has(p, "left4chat.verified")) {
-                p.sendMessage((Object)ChatColor.GREEN + "You are already verified! You may chat freely.");
+                p.sendMessage(ChatColor.GREEN + "You are already verified! You may chat freely.");
                 return true;
             }
             Type solution = Type.values()[rng.nextInt(Type.values().length)];
@@ -78,7 +78,7 @@ implements CommandExecutor {
     }
 
     public static boolean playerVerifying(Player p) {
-        return solutions.get((Object)p) != null;
+        return solutions.get(p) != null;
     }
 
     public static Type getType(Material mat) {
@@ -122,8 +122,8 @@ implements CommandExecutor {
     }
 
     public static Type getSolution(Player p) {
-        Type solution = solutions.get((Object)p);
-        solutions.remove((Object)p);
+        Type solution = solutions.get(p);
+        solutions.remove(p);
         return solution;
     }
 

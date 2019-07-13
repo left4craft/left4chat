@@ -19,7 +19,7 @@ public class AnnounceCommand implements CommandExecutor {
             j.publish("minecraft.chat.global.in", msg);
             j.close();
         } else {
-            sender.sendMessage((Object)ChatColor.RED + "Insufficient Permission.");
+            sender.sendMessage(ChatColor.RED + "Insufficient Permission.");
         }
         return true;
     }

@@ -131,11 +131,11 @@ implements Listener {
 
     @EventHandler
     public void onLeave(PlayerQuitEvent e) {
-        if (warnings.get((Object)e.getPlayer()) != null) {
-            warnings.remove((Object)e.getPlayer());
+        if (warnings.get(e.getPlayer()) != null) {
+            warnings.remove(e.getPlayer());
         }
         this.setAFK(e.getPlayer(), false, false);
-        moveTimes.remove((Object)e.getPlayer());
+        moveTimes.remove(e.getPlayer());
         e.setQuitMessage(null);
     }
 
@@ -166,21 +166,21 @@ implements Listener {
                 j.close();
                 return;
             }
-            if (warnings.get((Object)e.getPlayer()) == null) {
-                e.getPlayer().sendMessage((Object)ChatColor.RED + "You must verify your account with " + (Object)ChatColor.GOLD + "/verify" + (Object)ChatColor.RED + " before chatting or you will be " + (Object)ChatColor.BOLD + "permbanned" + (Object)ChatColor.RED + " (Warning 1/5)");
+            if (warnings.get(e.getPlayer()) == null) {
+                e.getPlayer().sendMessage(ChatColor.RED + "You must verify your account with " + ChatColor.GOLD + "/verify" + ChatColor.RED + " before chatting or you will be " + ChatColor.BOLD + "permbanned" + ChatColor.RED + " (Warning 1/5)");
                 warnings.put(e.getPlayer(), 2);
                 e.setCancelled(true);
                 j.close();
                 return;
             }
-            if (warnings.get((Object)e.getPlayer()) <= 5) {
-                e.getPlayer().sendMessage((Object)ChatColor.RED + "You must verify your account with " + (Object)ChatColor.GOLD + "/verify" + (Object)ChatColor.RED + " before chatting or you will be " + (Object)ChatColor.BOLD + "permbanned" + (Object)ChatColor.RED + " (Warning " + warnings.get((Object)e.getPlayer()) + "/5)");
-                warnings.put(e.getPlayer(), warnings.get((Object)e.getPlayer()) + 1);
+            if (warnings.get(e.getPlayer()) <= 5) {
+                e.getPlayer().sendMessage(ChatColor.RED + "You must verify your account with " + ChatColor.GOLD + "/verify" + ChatColor.RED + " before chatting or you will be " + ChatColor.BOLD + "permbanned" + ChatColor.RED + " (Warning " + warnings.get(e.getPlayer()) + "/5)");
+                warnings.put(e.getPlayer(), warnings.get(e.getPlayer()) + 1);
                 e.setCancelled(true);
                 j.close();
                 return;
             }
-            warnings.remove((Object)e.getPlayer());
+            warnings.remove(e.getPlayer());
             j.publish("minecraft.console.hub.in", "ban " + e.getPlayer().getName() + " Spambot (appealable)");
             e.setCancelled(true);
             j.close();
@@ -208,7 +208,7 @@ implements Listener {
                 message = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)message));
             }
         }
-        j.publish("minecraft.chat.global.in", String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + (Object)ChatColor.RESET + " " + message);
+        j.publish("minecraft.chat.global.in", String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + ChatColor.RESET + " " + message);
         e.setCancelled(true);
         j.close();
     }
@@ -247,12 +247,12 @@ implements Listener {
         } else if (VerifyCommand.playerVerifying(p)) {
             ItemStack clicked = e.getCurrentItem();
             if (VerifyCommand.getSolution(p) == VerifyCommand.getType(clicked.getType())) {
-                p.sendMessage((Object)ChatColor.GREEN + "Account Verified! You may not chat freely.");
+                p.sendMessage(ChatColor.GREEN + "Account Verified! You may not chat freely.");
                 p.closeInventory();
                 p.updateInventory();
                 Bukkit.dispatchCommand((CommandSender)Bukkit.getConsoleSender(), (String)("pp user " + p.getUniqueId() + " add left4chat.verified"));
             } else {
-                p.sendMessage((Object)ChatColor.RED + "Incorrect CAPTCHA response!");
+                p.sendMessage(ChatColor.RED + "Incorrect CAPTCHA response!");
                 p.closeInventory();
                 p.updateInventory();
                 Jedis j = new Jedis();
@@ -267,7 +267,7 @@ implements Listener {
     public void onClose(InventoryCloseEvent e) {
         Player p = (Player)e.getPlayer();
         if (VerifyCommand.playerVerifying(p)) {
-            p.sendMessage((Object)ChatColor.RED + "Kicked for incorrect CAPTCHA response!");
+            p.sendMessage(ChatColor.RED + "Kicked for incorrect CAPTCHA response!");
             Jedis j = new Jedis();
             j.publish("minecraft.console.hub.in", "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
             j.close();
@@ -316,7 +316,7 @@ implements Listener {
                             }
                         }
                         catch (ArrayIndexOutOfBoundsException e) {
-                            p.sendMessage((Object)ChatColor.RED + "Invalid JSON in minecraft.chat.replies");
+                            p.sendMessage(ChatColor.RED + "Invalid JSON in minecraft.chat.replies");
                         }
                         replies.put(reciever, sender);
                         jedis.set("minecraft.chat.replies", new JSONObject(replies).toJSONString());
@@ -351,8 +351,8 @@ implements Listener {
     public void toggleAfk(Player p) {
         String name = p.getName();
         Jedis jedis = new Jedis();
-        if (afkPlayers.contains((Object)p)) {
-            afkPlayers.remove((Object)p);
+        if (afkPlayers.contains(p)) {
+            afkPlayers.remove(p);
             jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk");
             jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is no longer afk.");
             perms.playerRemove(p, "harbor.bypass");
@@ -369,7 +369,7 @@ implements Listener {
     public void setAFK(Player p, boolean afk, boolean verbose) {
         String name = p.getName();
         Jedis jedis = new Jedis();
-        if (afk && !afkPlayers.contains((Object)p)) {
+        if (afk && !afkPlayers.contains(p)) {
             afkPlayers.add(p);
             jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(HumanEntity::getName).collect(Collectors.toList())));
             if (verbose) {
@@ -379,8 +379,8 @@ implements Listener {
                 jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is now afk.");
             }
             perms.playerAdd(p, "harbor.bypass");
-        } else if (!afk && afkPlayers.contains((Object)p)) {
-            afkPlayers.remove((Object)p);
+        } else if (!afk && afkPlayers.contains(p)) {
+            afkPlayers.remove(p);
             jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(HumanEntity::getName).collect(Collectors.toList())));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
