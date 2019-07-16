@@ -6,8 +6,11 @@ import io.loyloy.nicky.Nick;
 import io.loyloy.nicky.Nicky;
 import java.sql.Connection;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 import me.sisko.left4chat.AfkCommand;
 import me.sisko.left4chat.AnnounceCommand;
@@ -140,6 +143,7 @@ implements Listener {
 
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
+        e.getFrom().distance(e.getTo());
         moveTimes.put(e.getPlayer(), System.currentTimeMillis());
         this.setAFK(e.getPlayer(), false, true);
     }
@@ -352,11 +356,18 @@ implements Listener {
         Jedis jedis = new Jedis();
         if (afkPlayers.contains(p)) {
             afkPlayers.remove(p);
+            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
+            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
+            if(afkList.contains(p.getName())) afkList.remove(p.getName());
+            jedis.set("minecraft.afkplayers", String.join(",", afkList));
             jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk");
             jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is no longer afk.");
             perms.playerRemove(p, "harbor.bypass");
         } else {
             afkPlayers.add(p);
+            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
+            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
+            jedis.set("minecraft.afkplayers", String.join(",", afkList));
             jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk");
             jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is now afk.");
             perms.playerAdd(p, "harbor.bypass");
@@ -370,7 +381,9 @@ implements Listener {
         Jedis jedis = new Jedis();
         if (afk && !afkPlayers.contains(p)) {
             afkPlayers.add(p);
-            jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
+            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
+            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
+            jedis.set("minecraft.afkplayers", String.join(",", afkList));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
                 jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is now afk.");
@@ -378,7 +391,10 @@ implements Listener {
             perms.playerAdd(p, "harbor.bypass");
         } else if (!afk && afkPlayers.contains(p)) {
             afkPlayers.remove(p);
-            jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
+            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
+            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
+            if(afkList.contains(p.getName())) afkList.remove(p.getName());
+            jedis.set("minecraft.afkplayers", String.join(",", afkList));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
                 jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is no longer afk.");
