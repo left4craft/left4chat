@@ -1,9 +1,9 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.commands;
 
 import java.util.HashMap;
-import me.sisko.left4chat.AsyncUserSave;
-import me.sisko.left4chat.AsyncUserUpdate;
-import me.sisko.left4chat.Main;
+import me.sisko.left4chat.sql.AsyncUserSave;
+import me.sisko.left4chat.sql.AsyncUserUpdate;
+import me.sisko.left4chat.util.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;

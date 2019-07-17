@@ -1,4 +1,4 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.sql;
 
 import java.sql.Connection;
 import java.sql.SQLException;

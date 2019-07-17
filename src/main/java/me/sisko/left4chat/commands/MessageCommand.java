@@ -1,10 +1,10 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.commands;
 
 import io.loyloy.nicky.Nicky;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import me.sisko.left4chat.Main;
+import me.sisko.left4chat.util.Main;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;

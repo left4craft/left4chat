@@ -1,7 +1,6 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.util;
 
 import java.io.File;
-import me.sisko.left4chat.Main;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class ConfigManager {

@@ -1,7 +1,7 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.commands;
 
 import java.util.HashMap;
-import me.sisko.left4chat.Main;
+import me.sisko.left4chat.util.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;

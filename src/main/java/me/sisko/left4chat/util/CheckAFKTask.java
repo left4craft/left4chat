@@ -1,7 +1,6 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.util;
 
 
-import me.sisko.left4chat.Main;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 

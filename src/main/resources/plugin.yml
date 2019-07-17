@@ -1,5 +1,5 @@
 name: Left4Chat
-main: me.sisko.left4chat.Main
+main: me.sisko.left4chat.util.Main
 version: 1.6
 api-version: 1.14
 depend: [Vault, Nicky]

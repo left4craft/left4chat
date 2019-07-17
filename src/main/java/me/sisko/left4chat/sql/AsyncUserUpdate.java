@@ -1,11 +1,11 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.sql;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
-import me.sisko.left4chat.Main;
+import me.sisko.left4chat.util.Main;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;

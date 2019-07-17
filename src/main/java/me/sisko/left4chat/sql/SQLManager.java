@@ -1,10 +1,10 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.sql;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
-import me.sisko.left4chat.Main;
+import me.sisko.left4chat.util.Main;
 
 public class SQLManager {
     public static synchronized Connection connect() {

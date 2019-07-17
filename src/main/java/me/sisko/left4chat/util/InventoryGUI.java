@@ -1,4 +1,4 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.util;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

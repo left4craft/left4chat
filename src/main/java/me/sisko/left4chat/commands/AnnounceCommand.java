@@ -1,4 +1,4 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.commands;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;

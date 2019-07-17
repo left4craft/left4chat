@@ -1,7 +1,7 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.commands;
 
-import me.sisko.left4chat.InventoryGUI;
-import me.sisko.left4chat.Main;
+import me.sisko.left4chat.util.InventoryGUI;
+import me.sisko.left4chat.util.Main;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

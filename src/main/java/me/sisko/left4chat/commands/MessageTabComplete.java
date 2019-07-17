@@ -1,4 +1,4 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.commands;
 
 import io.loyloy.nicky.Nicky;
 import java.util.ArrayList;

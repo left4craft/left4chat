@@ -1,9 +1,28 @@
-package me.sisko.left4chat;
+package me.sisko.left4chat.util;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.loyloy.nicky.Nick;
 import io.loyloy.nicky.Nicky;
+import me.sisko.left4chat.commands.AfkCommand;
+import me.sisko.left4chat.commands.AnnounceCommand;
+import me.sisko.left4chat.commands.DiscordCommand;
+import me.sisko.left4chat.commands.GGiveCosmeticCommand;
+import me.sisko.left4chat.commands.GameCommand;
+import me.sisko.left4chat.commands.LockdownCommand;
+import me.sisko.left4chat.commands.MessageCommand;
+import me.sisko.left4chat.commands.MessageTabComplete;
+import me.sisko.left4chat.commands.ReloadCommand;
+import me.sisko.left4chat.commands.ReplyCommand;
+import me.sisko.left4chat.commands.VerifyCommand;
+import me.sisko.left4chat.sql.AsyncFixCoins;
+import me.sisko.left4chat.sql.AsyncKeepAlive;
+import me.sisko.left4chat.sql.AsyncUserUpdate;
+import me.sisko.left4chat.sql.SQLManager;
+import me.sisko.left4chat.util.CheckAFKTask;
+import me.sisko.left4chat.util.ConfigManager;
+import me.sisko.left4chat.util.InventoryGUI;
+
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,23 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import me.sisko.left4chat.AfkCommand;
-import me.sisko.left4chat.AnnounceCommand;
-import me.sisko.left4chat.AsyncKeepAlive;
-import me.sisko.left4chat.AsyncUserUpdate;
-import me.sisko.left4chat.CheckAFKTask;
-import me.sisko.left4chat.ConfigManager;
-import me.sisko.left4chat.DiscordCommand;
-import me.sisko.left4chat.GGiveCosmeticCommand;
-import me.sisko.left4chat.GameCommand;
-import me.sisko.left4chat.InventoryGUI;
-import me.sisko.left4chat.LockdownCommand;
-import me.sisko.left4chat.MessageCommand;
-import me.sisko.left4chat.MessageTabComplete;
-import me.sisko.left4chat.ReloadCommand;
-import me.sisko.left4chat.ReplyCommand;
-import me.sisko.left4chat.SQLManager;
-import me.sisko.left4chat.VerifyCommand;
+
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -37,9 +40,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -79,17 +80,17 @@ implements Listener {
         Bukkit.getPluginManager().registerEvents((Listener)this, (Plugin)this);
         this.getServer().getMessenger().registerOutgoingPluginChannel((Plugin)this, "BungeeCord");
         plugin = this;
-        this.getCommand("discord").setExecutor((CommandExecutor)new DiscordCommand());
-        this.getCommand("announce").setExecutor((CommandExecutor)new AnnounceCommand());
-        this.getCommand("game").setExecutor((CommandExecutor)new GameCommand());
-        this.getCommand("msg").setExecutor((CommandExecutor)new MessageCommand());
-        this.getCommand("msg").setTabCompleter((TabCompleter)new MessageTabComplete());
-        this.getCommand("reply").setExecutor((CommandExecutor)new ReplyCommand());
-        this.getCommand("afk").setExecutor((CommandExecutor)new AfkCommand());
-        this.getCommand("ggivecosmetic").setExecutor((CommandExecutor)new GGiveCosmeticCommand());
-        this.getCommand("verify").setExecutor((CommandExecutor)new VerifyCommand());
-        this.getCommand("chatlock").setExecutor((CommandExecutor)new LockdownCommand());
-        this.getCommand("chatreload").setExecutor((CommandExecutor)new ReloadCommand());
+        this.getCommand("discord").setExecutor(new DiscordCommand());
+        this.getCommand("announce").setExecutor(new AnnounceCommand());
+        this.getCommand("game").setExecutor(new GameCommand());
+        this.getCommand("msg").setExecutor(new MessageCommand());
+        this.getCommand("msg").setTabCompleter(new MessageTabComplete());
+        this.getCommand("reply").setExecutor(new ReplyCommand());
+        this.getCommand("afk").setExecutor(new AfkCommand());
+        this.getCommand("ggivecosmetic").setExecutor(new GGiveCosmeticCommand());
+        this.getCommand("verify").setExecutor(new VerifyCommand());
+        this.getCommand("chatlock").setExecutor(new LockdownCommand());
+        this.getCommand("chatreload").setExecutor(new ReloadCommand());
         afkPlayers = new ArrayList<Player>();
         moveTimes = new HashMap<Player, Long>();
         warnings = new HashMap<Player, Integer>();
@@ -123,6 +124,7 @@ implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         e.setJoinMessage(null);
+        new AsyncFixCoins(getSQL(), e.getPlayer()).runTaskLaterAsynchronously(this, 20);
         try {
             new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin)this);
         }
