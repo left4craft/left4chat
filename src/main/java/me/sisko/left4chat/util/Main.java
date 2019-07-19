@@ -252,10 +252,10 @@ implements Listener {
         } else if (VerifyCommand.playerVerifying(p)) {
             ItemStack clicked = e.getCurrentItem();
             if (VerifyCommand.getSolution(p) == VerifyCommand.getType(clicked.getType())) {
-                p.sendMessage(ChatColor.GREEN + "Account Verified! You may not chat freely.");
+                p.sendMessage(ChatColor.GREEN + "Account Verified! You may now chat freely.");
                 p.closeInventory();
                 p.updateInventory();
-                Bukkit.dispatchCommand((CommandSender)Bukkit.getConsoleSender(), (String)("pp user " + p.getUniqueId() + " add left4chat.verified"));
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + p.getName() + " permission set left4chat.verified");
             } else {
                 p.sendMessage(ChatColor.RED + "Incorrect CAPTCHA response!");
                 p.closeInventory();
