@@ -25,7 +25,7 @@ public class AsyncUserSave extends BukkitRunnable {
     public AsyncUserSave setup(Connection connection, String uuid, String nick) {
         this.connection = connection;
         this.uuid = uuid;
-        this.nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)nick));
+        this.nick = ChatColor.stripColor((String) ChatColor.translateAlternateColorCodes((char) '&', (String) nick));
         this.discordID = null;
         return this;
     }
@@ -34,25 +34,29 @@ public class AsyncUserSave extends BukkitRunnable {
         this.uuid = this.uuid.replace("-", "");
         try {
             Statement statement = this.connection.createStatement();
-            ResultSet result = statement.executeQuery("SELECT * FROM discord_users WHERE UUID = UNHEX('" + this.uuid + "');");
+            ResultSet result = statement
+                    .executeQuery("SELECT * FROM discord_users WHERE UUID = UNHEX('" + this.uuid + "');");
             if (result.next()) {
                 if (this.discordID != null) {
                     String id = Long.toString(result.getLong("discordID"));
                     Jedis r = new Jedis();
                     r.publish("discord.botcommands", "unlink " + id + " " + this.discordID);
                     r.close();
-                    statement.executeUpdate("UPDATE discord_users SET nick = \"" + this.nick + "\", discordID = " + this.discordID + " WHERE UUID = UNHEX('" + this.uuid + "');");
-                    statement.executeUpdate("DELETE FROM discord_users WHERE discordID = " + id);
+                    if (!id.equals(discordID)) {
+                        statement.executeUpdate("UPDATE discord_users SET nick = \"" + this.nick + "\", discordID = "
+                                + this.discordID + " WHERE UUID = UNHEX('" + this.uuid + "');");
+                        statement.executeUpdate("DELETE FROM discord_users WHERE discordID = " + id);
+                    }
                 } else {
-                    statement.executeUpdate("UPDATE discord_users SET nick = \"" + this.nick + "\" WHERE UUID = UNHEX('" + this.uuid + "');");
+                    statement.executeUpdate("UPDATE discord_users SET nick = \"" + this.nick + "\" WHERE UUID = UNHEX('"
+                            + this.uuid + "');");
                 }
             } else {
-                statement.executeUpdate("INSERT INTO discord_users (uuid, nick, discordID) VALUES (UNHEX('" + this.uuid + "'), \"" + this.nick + "\"," + this.discordID + ");");
+                statement.executeUpdate("INSERT INTO discord_users (uuid, nick, discordID) VALUES (UNHEX('" + this.uuid
+                        + "'), \"" + this.nick + "\"," + this.discordID + ");");
             }
-        }
-        catch (SQLException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 }
-
