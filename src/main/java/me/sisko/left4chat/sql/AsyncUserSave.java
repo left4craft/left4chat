@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import me.sisko.left4chat.util.Main;
 import redis.clients.jedis.Jedis;
 
 public class AsyncUserSave extends BukkitRunnable {
@@ -39,7 +41,9 @@ public class AsyncUserSave extends BukkitRunnable {
             if (result.next()) {
                 if (this.discordID != null) {
                     String id = Long.toString(result.getLong("discordID"));
-                    Jedis r = new Jedis();
+                    Jedis r = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                    r.auth(Main.plugin.getConfig().getString("redispass"));
+                                
                     r.publish("discord.botcommands", "unlink " + id + " " + this.discordID);
                     r.close();
                     if (!id.equals(discordID)) {

@@ -35,7 +35,9 @@ extends BukkitRunnable {
             ResultSet result = statement.executeQuery("SELECT * FROM discord_users WHERE UUID = UNHEX('" + uuid + "');");
             if (result.next()) {
                 long id = result.getLong("discordID");
-                Jedis j = new Jedis();
+                Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                j.auth(Main.plugin.getConfig().getString("redispass"));
+                        
                 j.publish("discord.botcommands", "setuser " + id + " " + this.nick);
                 j.publish("discord.botcommands", "setgroup " + id + " " + Main.getGroup(this.world, this.op));
                 Main.plugin.getLogger().info("Connected Minecraft Account " + this.op.getName() + " to discord account " + id);

@@ -59,9 +59,7 @@ import org.json.simple.JSONObject;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
-public class Main
-extends JavaPlugin
-implements Listener {
+public class Main extends JavaPlugin implements Listener {
     public static Main plugin;
     private static Connection connection;
     private static Permission perms;
@@ -76,8 +74,8 @@ implements Listener {
     }
 
     public void onEnable() {
-        Bukkit.getPluginManager().registerEvents((Listener)this, (Plugin)this);
-        this.getServer().getMessenger().registerOutgoingPluginChannel((Plugin)this, "BungeeCord");
+        Bukkit.getPluginManager().registerEvents(this, this);
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
         plugin = this;
         this.getCommand("discord").setExecutor(new DiscordCommand());
         this.getCommand("announce").setExecutor(new AnnounceCommand());
@@ -90,6 +88,7 @@ implements Listener {
         this.getCommand("verify").setExecutor(new VerifyCommand());
         this.getCommand("chatlock").setExecutor(new LockdownCommand());
         this.getCommand("chatreload").setExecutor(new ReloadCommand());
+    
         afkPlayers = new ArrayList<Player>();
         moveTimes = new HashMap<Player, Long>();
         warnings = new HashMap<Player, Integer>();
@@ -106,7 +105,8 @@ implements Listener {
     }
 
     public static String getCodes() {
-        Jedis j = new Jedis();
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        j.auth(Main.plugin.getConfig().getString("redispass"));
         String codes = j.get("discord.synccodes");
         j.close();
         return codes;
@@ -163,7 +163,8 @@ implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
-        Jedis j = new Jedis();
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        j.auth(Main.plugin.getConfig().getString("redispass"));
         if (j.get("minecraft.lockdown").equals("true") && !perms.has(e.getPlayer(), "left4chat.verified")) {
             if (VerifyCommand.playerVerifying(e.getPlayer())) {
                 j.publish("minecraft.console.hub.in", "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
@@ -259,7 +260,8 @@ implements Listener {
                 p.sendMessage(ChatColor.RED + "Incorrect CAPTCHA response!");
                 p.closeInventory();
                 p.updateInventory();
-                Jedis j = new Jedis();
+                Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                j.auth(Main.plugin.getConfig().getString("redispass"));
                 j.publish("minecraft.console.hub.in", "kick " + e.getWhoClicked().getName() + " Incorrect CAPTCHA solution");
                 j.close();
             }
@@ -272,7 +274,8 @@ implements Listener {
         Player p = (Player)e.getPlayer();
         if (VerifyCommand.playerVerifying(p)) {
             p.sendMessage(ChatColor.RED + "Kicked for incorrect CAPTCHA response!");
-            Jedis j = new Jedis();
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            j.auth(Main.plugin.getConfig().getString("redispass"));
             j.publish("minecraft.console.hub.in", "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
             j.close();
         }
@@ -297,8 +300,9 @@ implements Listener {
                     Collection<? extends Player> players = Bukkit.getOnlinePlayers();
                     for (Player p : players) {
                         if (!p.getName().equalsIgnoreCase(reciever)) continue;
-                        Jedis jedis = new Jedis();
-                        for (String player : jedis.get("minecraft.players").split(",")) {
+                        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                        jedis.auth(Main.plugin.getConfig().getString("redispass"));
+                                        for (String player : jedis.get("minecraft.players").split(",")) {
                             if (!player.split(" ")[0].equalsIgnoreCase(sender)) continue;
                             String nick = Nicky.getNickDatabase().downloadNick(player.split(" ")[1]);
                             if (nick == null) {
@@ -334,8 +338,9 @@ implements Listener {
             @Override
             public void run() {
                 try {
-                    Jedis jedis = new Jedis();
-                    jedis.subscribe(jedisPubSub, "minecraft.chat.global.in", "minecraft.chat.messages");
+                    Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                    jedis.auth(Main.plugin.getConfig().getString("redispass"));
+                                jedis.subscribe(jedisPubSub, "minecraft.chat.global.in", "minecraft.chat.messages");
                     Main.this.getLogger().warning("Subscriber closed!");
                     jedis.quit();
                     jedis.close();
@@ -354,7 +359,8 @@ implements Listener {
 
     public void toggleAfk(Player p) {
         String name = p.getName();
-        Jedis jedis = new Jedis();
+        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        jedis.auth(Main.plugin.getConfig().getString("redispass"));
         if (afkPlayers.contains(p)) {
             afkPlayers.remove(p);
             Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
@@ -379,7 +385,9 @@ implements Listener {
 
     public void setAFK(Player p, boolean afk, boolean verbose) {
         String name = p.getName();
-        Jedis jedis = new Jedis();
+        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        jedis.auth(Main.plugin.getConfig().getString("redispass"));
+        
         if (afk && !afkPlayers.contains(p)) {
             afkPlayers.add(p);
             Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));

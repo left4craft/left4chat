@@ -27,7 +27,9 @@ implements CommandExecutor {
             p.sendMessage(ChatColor.RED + "Usage: /" + label + " <message>");
         } else {
             String name = p.getName();
-            Jedis j = new Jedis();
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            j.auth(Main.plugin.getConfig().getString("redispass"));
+
             String tempJson = j.get("minecraft.chat.replies");
             String[] parts = tempJson.replace(" ", "").split(",");
             HashMap<String, String> replies = new HashMap<String, String>();

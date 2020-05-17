@@ -12,6 +12,8 @@ public class ConfigManager {
         config.addDefault("sql.port", 3306);
         config.addDefault("sql.user", "user");
         config.addDefault("sql.pass", "password");
+        config.addDefault("redisip", "ip");
+        config.addDefault("redispass", "secret");
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();
         }
@@ -21,6 +23,7 @@ public class ConfigManager {
             Main.getPlugin().saveConfig();
         } else {
             Main.getPlugin().getLogger().info("Config.yml found, loading!");
+            config.options().copyDefaults(false);
         }
     }
 
