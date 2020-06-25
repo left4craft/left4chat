@@ -11,6 +11,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.json.JSONObject;
+
 import redis.clients.jedis.Jedis;
 
 public class AsyncUserUpdate
@@ -34,12 +36,23 @@ extends BukkitRunnable {
             Statement statement = this.connection.createStatement();
             ResultSet result = statement.executeQuery("SELECT * FROM discord_users WHERE UUID = UNHEX('" + uuid + "');");
             if (result.next()) {
-                long id = result.getLong("discordID");
+                String id = Long.toString(result.getLong("discordID"));
+
+                JSONObject nickCommand = new JSONObject();
+                nickCommand.put("command", "setuser");
+                nickCommand.put("id", id);
+                nickCommand.put("nick", this.nick);
+
+                JSONObject groupCommand = new JSONObject();
+                groupCommand.put("command", "setgroup");
+                nickCommand.put("id", id);
+                nickCommand.put("group", Main.getGroup(this.world, this.op).toLowerCase());
+
                 Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
                 j.auth(Main.plugin.getConfig().getString("redispass"));
                         
-                j.publish("discord.botcommands", "setuser " + id + " " + this.nick);
-                j.publish("discord.botcommands", "setgroup " + id + " " + Main.getGroup(this.world, this.op));
+                j.publish("discord.botcommands", nickCommand.toString());
+                j.publish("discord.botcommands", groupCommand.toString());
                 Main.plugin.getLogger().info("Connected Minecraft Account " + this.op.getName() + " to discord account " + id);
                 j.close();
             } else {

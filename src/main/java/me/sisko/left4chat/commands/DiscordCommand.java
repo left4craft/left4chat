@@ -1,6 +1,5 @@
 package me.sisko.left4chat.commands;
 
-import java.util.HashMap;
 import java.util.Iterator;
 
 import me.sisko.left4chat.sql.AsyncUserSave;
