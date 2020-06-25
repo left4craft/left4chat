@@ -45,8 +45,8 @@ extends BukkitRunnable {
 
                 JSONObject groupCommand = new JSONObject();
                 groupCommand.put("command", "setgroup");
-                nickCommand.put("id", id);
-                nickCommand.put("group", Main.getGroup(this.world, this.op).toLowerCase());
+                groupCommand.put("id", id);
+                groupCommand.put("group", Main.getGroup(this.world, this.op).toLowerCase());
 
                 Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
                 j.auth(Main.plugin.getConfig().getString("redispass"));
