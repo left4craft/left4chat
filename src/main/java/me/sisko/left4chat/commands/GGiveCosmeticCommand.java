@@ -18,7 +18,8 @@ implements CommandExecutor {
         } else if (args.length < 2) {
             Main.plugin.getLogger().info("Usage: /ggivecosmetic <name> <amount> [tier]");
         } else {
-            Jedis j = new Jedis();
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            j.auth(Main.plugin.getConfig().getString("redispass"));
             if (args.length == 2) {
                 j.publish("minecraft.console.hub.in", "givecosmetic " + args[0] + " " + args[1]);
             } else {

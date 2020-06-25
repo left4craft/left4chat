@@ -14,7 +14,9 @@ implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        Jedis j = new Jedis();
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        j.auth(Main.plugin.getConfig().getString("redispass"));
+        
         String name = "Console";
         if (sender instanceof Player) {
             name = ((Player)sender).getName();
@@ -23,6 +25,9 @@ implements CommandExecutor {
                 j.close();
                 return true;
             }
+        }
+        if(j.get("minecraft.lockdown") == null) {
+            j.set("minecraft.lockdown", "false");
         }
         if (j.get("minecraft.lockdown").equals("false")) {
             j.set("minecraft.lockdown", "true");

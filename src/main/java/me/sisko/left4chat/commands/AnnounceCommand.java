@@ -5,6 +5,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import me.sisko.left4chat.util.Main;
 import redis.clients.jedis.Jedis;
 
 public class AnnounceCommand implements CommandExecutor {
@@ -15,7 +17,8 @@ public class AnnounceCommand implements CommandExecutor {
             for (String arg : args) {
                 msg = String.valueOf(msg) + arg + " ";
             }
-            Jedis j = new Jedis();
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            j.auth(Main.plugin.getConfig().getString("redispass"));
             j.publish("minecraft.chat.global.in", msg);
             j.close();
         } else {

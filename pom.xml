@@ -69,5 +69,11 @@
 			<scope>system</scope>
 			<systemPath>${project.basedir}/../depend/Nicky.jar</systemPath>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+    		<groupId>org.json</groupId>
+   			<artifactId>json</artifactId>
+    		<version>20200518</version>
+		</dependency>
 	</dependencies>
 </project>

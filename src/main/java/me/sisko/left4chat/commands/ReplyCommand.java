@@ -30,6 +30,9 @@ implements CommandExecutor {
             Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
 
+            if(j.get("minecraft.chat.replies") == null) {
+                j.set("minecraft.chat.replies", "");
+            }
             String tempJson = j.get("minecraft.chat.replies");
             String[] parts = tempJson.replace(" ", "").split(",");
             HashMap<String, String> replies = new HashMap<String, String>();

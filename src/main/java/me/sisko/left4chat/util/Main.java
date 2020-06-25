@@ -19,9 +19,6 @@ import me.sisko.left4chat.sql.AsyncFixCoins;
 import me.sisko.left4chat.sql.AsyncKeepAlive;
 import me.sisko.left4chat.sql.AsyncUserUpdate;
 import me.sisko.left4chat.sql.SQLManager;
-import me.sisko.left4chat.util.CheckAFKTask;
-import me.sisko.left4chat.util.ConfigManager;
-import me.sisko.left4chat.util.InventoryGUI;
 
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -165,7 +162,7 @@ public class Main extends JavaPlugin implements Listener {
     public void onChat(AsyncPlayerChatEvent e) {
         Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
-        if (j.get("minecraft.lockdown").equals("true") && !perms.has(e.getPlayer(), "left4chat.verified")) {
+        if (j.get("minecraft.lockdown") != null && j.get("minecraft.lockdown").equals("true") && !perms.has(e.getPlayer(), "left4chat.verified")) {
             if (VerifyCommand.playerVerifying(e.getPlayer())) {
                 j.publish("minecraft.console.hub.in", "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
                 j.close();
@@ -199,7 +196,12 @@ public class Main extends JavaPlugin implements Listener {
             name = e.getPlayer().getName();
         }
         name = ChatColor.translateAlternateColorCodes('&', name);
-        j.publish("minecraft.chat.global.out", "**" + e.getPlayer().getUniqueId() + "**[" + group + "] " + ChatColor.stripColor((String)(String.valueOf(name) + "** " + e.getMessage())).replaceAll("&.", ""));
+        HashMap<String, String> chatMessage = new HashMap<String, String>();
+        chatMessage.put("uuid", e.getPlayer().getUniqueId().toString());
+        chatMessage.put("name", "[" + group + "] " + ChatColor.stripColor(name));
+        chatMessage.put("message", ChatColor.stripColor(e.getMessage()));
+
+        j.publish("minecraft.chat.global.out", new JSONObject(chatMessage).toJSONString());
         String message = e.getMessage();
         if (!perms.has(e.getPlayer(), "left4chat.format")) {
             if (perms.has(e.getPlayer(), "left4chat.color")) {
@@ -310,6 +312,9 @@ public class Main extends JavaPlugin implements Listener {
                             }
                             p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6" + nick + " &c-> &6You&c]&r " + contents)));
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
+                        }
+                        if(jedis.get("minecraft.chat.replies") == null) {
+                            jedis.set("minecraft.chat.replies", "");
                         }
                         String tempJson = jedis.get("minecraft.chat.replies");
                         String[] parts = tempJson.replace(" ", "").split(",");

@@ -38,7 +38,9 @@ implements CommandExecutor {
                 message = String.valueOf(message) + args[i] + " ";
             }
             message = message.substring(0, message.length() - 1);
-            Jedis j = new Jedis();
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            j.auth(Main.plugin.getConfig().getString("redispass"));
+                
             String[] players = j.get("minecraft.players").split(",");
             ArrayList<String> possibleUsers = new ArrayList<String>();
             j.close();
@@ -109,7 +111,9 @@ implements CommandExecutor {
                 message = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)message));
             }
         }
-        Jedis j = new Jedis();
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        j.auth(Main.plugin.getConfig().getString("redispass"));
+        
         for (String player : j.get("minecraft.players").split(",")) {
             if (!player.split(" ")[0].equalsIgnoreCase(name)) continue;
             String nick = Nicky.getNickDatabase().downloadNick(player.split(" ")[1]);
@@ -118,6 +122,9 @@ implements CommandExecutor {
             }
             p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6You &c-> &6" + nick + "&c]&r " + message)));
             boolean afk = false;
+            if(j.get("minecraft.afkplayers") == null) {
+                j.set("minecraft.afkplayers", "");
+            }
             for (String afkPlayer : j.get("minecraft.afkplayers").split(",")) {
                 if (!afkPlayer.equalsIgnoreCase(name)) continue;
                 afk = true;

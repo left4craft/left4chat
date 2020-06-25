@@ -1,6 +1,8 @@
 package me.sisko.left4chat.commands;
 
 import io.loyloy.nicky.Nicky;
+import me.sisko.left4chat.util.Main;
+
 import java.util.ArrayList;
 import java.util.List;
 import net.md_5.bungee.api.ChatColor;
@@ -16,7 +18,9 @@ implements TabCompleter {
         if (sender instanceof Player && args.length == 1) {
             ArrayList<String> tabComplete = new ArrayList<String>();
             ArrayList<String> uuids = new ArrayList<String>();
-            Jedis j = new Jedis();
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            j.auth(Main.plugin.getConfig().getString("redispass"));
+                
             String[] players = j.get("minecraft.players").split(",");
             j.close();
             for (String player : players) {
