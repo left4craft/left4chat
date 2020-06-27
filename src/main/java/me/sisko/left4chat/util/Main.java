@@ -52,6 +52,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import redis.clients.jedis.Jedis;
@@ -303,23 +304,27 @@ public class Main extends JavaPlugin implements Listener {
                     Collection<? extends Player> players = Bukkit.getOnlinePlayers();
                     for (Player p : players) {
                         if (!p.getName().equalsIgnoreCase(reciever)) continue;
+
                         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
                         jedis.auth(Main.plugin.getConfig().getString("redispass"));
-                                        for (String player : jedis.get("minecraft.players").split(",")) {
-                            if (!player.split(" ")[0].equalsIgnoreCase(sender)) continue;
-                            String nick = Nicky.getNickDatabase().downloadNick(player.split(" ")[1]);
+
+                        JSONArray globalPlayers = new JSONArray(jedis.get("minecraft.players"));
+                        for (int i = 0; i < globalPlayers.length(); i++) {
+                            if (!globalPlayers.getJSONObject(i).getString("username").equalsIgnoreCase(sender)) continue;
+                            String nick = Nicky.getNickDatabase().downloadNick(globalPlayers.getJSONObject(i).getString("uuid"));
                             if (nick == null) {
                                 nick = sender;
                             }
                             p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6" + nick + " &c-> &6You&c]&r " + contents)));
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
                         }
+
                         if(jedis.get("minecraft.chat.replies") == null) {
                             jedis.set("minecraft.chat.replies", "{}");
                         }
                         JSONObject replies = new JSONObject(jedis.get("minecraft.chat.replies"));
                         replies.put(reciever, sender);
-                        jedis.set("minecraft.chat.replies", new JSONObject(replies).toString());
+                        jedis.set("minecraft.chat.replies", replies.toString());
                         jedis.close();
                     }
                 }

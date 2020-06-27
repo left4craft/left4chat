@@ -139,7 +139,7 @@ implements CommandExecutor {
             JSONObject player = players.getJSONObject(i);
 
 
-            if (!player.getString("name").equalsIgnoreCase(name)) continue;
+            if (!player.getString("username").equalsIgnoreCase(name)) continue;
 
             String nick = Nicky.getNickDatabase().downloadNick(player.getString("uuid"));
             if (nick == null) {

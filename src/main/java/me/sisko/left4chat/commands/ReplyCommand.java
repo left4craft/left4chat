@@ -9,6 +9,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import redis.clients.jedis.Jedis;
 
 public class ReplyCommand
@@ -31,28 +34,20 @@ implements CommandExecutor {
             j.auth(Main.plugin.getConfig().getString("redispass"));
 
             if(j.get("minecraft.chat.replies") == null) {
-                j.set("minecraft.chat.replies", "");
+                j.set("minecraft.chat.replies", "{}");
             }
-            String tempJson = j.get("minecraft.chat.replies");
-            String[] parts = tempJson.replace(" ", "").split(",");
-            HashMap<String, String> replies = new HashMap<String, String>();
-            try {
-                for (int i = 0; i < parts.length; ++i) {
-                    parts[i] = parts[i].replace("\"", "");
-                    parts[i] = parts[i].replace("{", "");
-                    parts[i] = parts[i].replace("}", "");
-                    String[] subparts = parts[i].split(":");
-                    replies.put(subparts[0], subparts[1]);
-                }
-            }
-            catch (ArrayIndexOutOfBoundsException e) {
-                p.sendMessage(ChatColor.RED + "Invalid JSON in minecraft.chat.replies");
-            }
-            if (!replies.containsKey(name)) {
+            
+            JSONObject replies = new JSONObject(j.get("minecraft.chat.replies"));
+
+            if (!replies.has(name)) {
                 p.sendMessage(ChatColor.RED + "There is nobody to whom you can reply.");
             } else {
-                for (String player : j.get("minecraft.players").split(",")) {
-                    if (!player.split(" ")[0].equalsIgnoreCase((String)replies.get(name))) continue;
+
+                JSONArray players = new JSONArray(j.get("minecraft.players"));
+
+                for (int i = 0; i < players.length(); i++) {
+                    if (!players.getJSONObject(i).getString("username").equalsIgnoreCase((String)replies.get(name))) continue;
+
                     String message = "";
                     for (String arg : args) {
                         message = String.valueOf(message) + arg + " ";
