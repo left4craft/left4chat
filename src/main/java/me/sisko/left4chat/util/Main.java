@@ -52,7 +52,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.JSONObject;
+import org.json.JSONObject;
+
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
@@ -201,7 +202,7 @@ public class Main extends JavaPlugin implements Listener {
         chatMessage.put("name", "[" + group + "] " + ChatColor.stripColor(name));
         chatMessage.put("message", ChatColor.stripColor(e.getMessage()));
 
-        j.publish("minecraft.chat.global.out", new JSONObject(chatMessage).toJSONString());
+        j.publish("minecraft.chat.global.out", new JSONObject(chatMessage).toString());
         String message = e.getMessage();
         if (!perms.has(e.getPlayer(), "left4chat.format")) {
             if (perms.has(e.getPlayer(), "left4chat.color")) {
@@ -314,25 +315,11 @@ public class Main extends JavaPlugin implements Listener {
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
                         }
                         if(jedis.get("minecraft.chat.replies") == null) {
-                            jedis.set("minecraft.chat.replies", "");
+                            jedis.set("minecraft.chat.replies", "{}");
                         }
-                        String tempJson = jedis.get("minecraft.chat.replies");
-                        String[] parts = tempJson.replace(" ", "").split(",");
-                        HashMap<String, String> replies = new HashMap<String, String>();
-                        try {
-                            for (int i = 0; i < parts.length; ++i) {
-                                parts[i] = parts[i].replace("\"", "");
-                                parts[i] = parts[i].replace("{", "");
-                                parts[i] = parts[i].replace("}", "");
-                                String[] subparts = parts[i].split(":");
-                                replies.put(subparts[0], subparts[1]);
-                            }
-                        }
-                        catch (ArrayIndexOutOfBoundsException e) {
-                            p.sendMessage(ChatColor.RED + "Invalid JSON in minecraft.chat.replies");
-                        }
+                        JSONObject replies = new JSONObject(jedis.get("minecraft.chat.replies"));
                         replies.put(reciever, sender);
-                        jedis.set("minecraft.chat.replies", new JSONObject(replies).toJSONString());
+                        jedis.set("minecraft.chat.replies", new JSONObject(replies).toString());
                         jedis.close();
                     }
                 }

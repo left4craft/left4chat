@@ -10,6 +10,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.json.JSONArray;
+
 import redis.clients.jedis.Jedis;
 
 public class MessageTabComplete
@@ -21,11 +23,12 @@ implements TabCompleter {
             Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
                 
-            String[] players = j.get("minecraft.players").split(",");
+            JSONArray players = new JSONArray(j.get("minecraft.players"));
+            
             j.close();
-            for (String player : players) {
-                tabComplete.add(player.split(" ")[0]);
-                uuids.add(player.split(" ")[1]);
+            for (int i = 0; i < players.length(); i++) {
+                tabComplete.add(players.getJSONObject(i).getString("username"));
+                uuids.add(players.getJSONObject(i).getString("uuid"));
             }
             for (String uuid : uuids) {
                 String nick = Nicky.getNickDatabase().downloadNick(uuid);

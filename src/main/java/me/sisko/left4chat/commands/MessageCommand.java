@@ -13,6 +13,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import redis.clients.jedis.Jedis;
 
 public class MessageCommand
@@ -41,25 +44,39 @@ implements CommandExecutor {
             Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
                 
-            String[] players = j.get("minecraft.players").split(",");
-            ArrayList<String> possibleUsers = new ArrayList<String>();
+            JSONArray players = new JSONArray(j.get("minecraft.players"));
             j.close();
-            String[] arrstring = players;
-            int n = arrstring.length;
-            for (int i = 0; i < n; ++i) {
-                String player = arrstring[i];
-                String name = player.split(" ")[0];
-                if (name.equalsIgnoreCase(reciever)) {
+
+            ArrayList<String> possibleUsers = new ArrayList<String>();
+
+            for(int i = 0; i < players.length(); i++) {
+                JSONObject player = players.getJSONObject(i);
+                String name = player.getString("username");
+
+                if(name.equalsIgnoreCase(reciever)) {
                     this.sendMessage(p, name, message);
                     return true;
                 }
                 if (!name.toLowerCase().startsWith(reciever.toLowerCase())) continue;
                 possibleUsers.add(name);
             }
+            // players.forEach((Objet player) -> {
+            //     String player = arrstring[i];
+            //     String name = player.split(" ")[0];
+            //     if (name.equalsIgnoreCase(reciever)) {
+            //         this.sendMessage(p, name, message);
+            //         return true;
+            //     }
+            //     if (!name.toLowerCase().startsWith(reciever.toLowerCase())) continue;
+            //     possibleUsers.add(name);
+            // }
             HashMap<String, String> usernameNickname = new HashMap<String, String>();
-            for (String player : players) {
-                String name = player.split(" ")[0];
-                String nickColor = Nicky.getNickDatabase().downloadNick(player.split(" ")[1]);
+
+            for(int i = 0; i < players.length(); i++) {
+                JSONObject player = players.getJSONObject(i);
+                String name = player.getString("username");
+
+                String nickColor = Nicky.getNickDatabase().downloadNick(player.getString("uuid"));
                 if (nickColor == null) continue;
                 String nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)nickColor));
                 if (reciever.equalsIgnoreCase(nick)) {
@@ -71,6 +88,8 @@ implements CommandExecutor {
                 }
                 usernameNickname.put(name, nickColor);
             }
+
+
             HashSet<String> set = new HashSet<String>(possibleUsers);
             possibleUsers.clear();
             possibleUsers.addAll(set);
@@ -114,9 +133,15 @@ implements CommandExecutor {
         Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         
-        for (String player : j.get("minecraft.players").split(",")) {
-            if (!player.split(" ")[0].equalsIgnoreCase(name)) continue;
-            String nick = Nicky.getNickDatabase().downloadNick(player.split(" ")[1]);
+        JSONArray players = new JSONArray(j.get("minecraft.players"));
+
+        for (int i = 0; i < players.length(); i++) {
+            JSONObject player = players.getJSONObject(i);
+
+
+            if (!player.getString("name").equalsIgnoreCase(name)) continue;
+
+            String nick = Nicky.getNickDatabase().downloadNick(player.getString("uuid"));
             if (nick == null) {
                 nick = name;
             }
@@ -143,4 +168,3 @@ implements CommandExecutor {
         p.sendMessage(ChatColor.RED + "Error: " + name + " is not online.");
     }
 }
-
