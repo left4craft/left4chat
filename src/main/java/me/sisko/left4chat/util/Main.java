@@ -87,18 +87,19 @@ public class Main extends JavaPlugin implements Listener {
         this.getCommand("verify").setExecutor(new VerifyCommand());
         this.getCommand("chatlock").setExecutor(new LockdownCommand());
         this.getCommand("chatreload").setExecutor(new ReloadCommand());
-    
+
         afkPlayers = new ArrayList<Player>();
         moveTimes = new HashMap<Player, Long>();
         warnings = new HashMap<Player, Integer>();
-        RegisteredServiceProvider<Permission> rspPerm = this.getServer().getServicesManager().getRegistration(Permission.class);
-        perms = (Permission)rspPerm.getProvider();
+        RegisteredServiceProvider<Permission> rspPerm = this.getServer().getServicesManager()
+                .getRegistration(Permission.class);
+        perms = (Permission) rspPerm.getProvider();
         RegisteredServiceProvider<Chat> rspChat = this.getServer().getServicesManager().getRegistration(Chat.class);
-        chat = (Chat)rspChat.getProvider();
+        chat = (Chat) rspChat.getProvider();
         InventoryGUI.setup();
         connection = SQLManager.connect();
-        new AsyncKeepAlive(connection).runTaskTimerAsynchronously((Plugin)this, 0L, 72000L);
-        new CheckAFKTask().runTaskTimer((Plugin)this, 0L, 200L);
+        new AsyncKeepAlive(connection).runTaskTimerAsynchronously((Plugin) this, 0L, 72000L);
+        new CheckAFKTask().runTaskTimer((Plugin) this, 0L, 200L);
         this.subscribe();
         ConfigManager.load();
     }
@@ -124,10 +125,9 @@ public class Main extends JavaPlugin implements Listener {
         e.setJoinMessage(null);
         new AsyncFixCoins(getSQL(), e.getPlayer()).runTaskLaterAsynchronously(this, 20);
         try {
-            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin)this);
-        }
-        catch (Exception e2) {
-            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin)this);
+            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
+        } catch (Exception e2) {
+            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
         }
     }
 
@@ -164,21 +164,29 @@ public class Main extends JavaPlugin implements Listener {
     public void onChat(AsyncPlayerChatEvent e) {
         Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
-        if (j.get("minecraft.lockdown") != null && j.get("minecraft.lockdown").equals("true") && !perms.has(e.getPlayer(), "left4chat.verified")) {
+        if (j.get("minecraft.lockdown") != null && j.get("minecraft.lockdown").equals("true")
+                && !perms.has(e.getPlayer(), "left4chat.verified")) {
             if (VerifyCommand.playerVerifying(e.getPlayer())) {
-                j.publish("minecraft.console.hub.in", "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
+                j.publish("minecraft.console.hub.in",
+                        "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
                 j.close();
                 return;
             }
             if (warnings.get(e.getPlayer()) == null) {
-                e.getPlayer().sendMessage(ChatColor.RED + "You must verify your account with " + ChatColor.GOLD + "/verify" + ChatColor.RED + " before chatting or you will be " + ChatColor.BOLD + "permbanned" + ChatColor.RED + " (Warning 1/5)");
+                e.getPlayer()
+                        .sendMessage(ChatColor.RED + "You must verify your account with " + ChatColor.GOLD + "/verify"
+                                + ChatColor.RED + " before chatting or you will be " + ChatColor.BOLD + "permbanned"
+                                + ChatColor.RED + " (Warning 1/5)");
                 warnings.put(e.getPlayer(), 2);
                 e.setCancelled(true);
                 j.close();
                 return;
             }
             if (warnings.get(e.getPlayer()) <= 5) {
-                e.getPlayer().sendMessage(ChatColor.RED + "You must verify your account with " + ChatColor.GOLD + "/verify" + ChatColor.RED + " before chatting or you will be " + ChatColor.BOLD + "permbanned" + ChatColor.RED + " (Warning " + warnings.get(e.getPlayer()) + "/5)");
+                e.getPlayer()
+                        .sendMessage(ChatColor.RED + "You must verify your account with " + ChatColor.GOLD + "/verify"
+                                + ChatColor.RED + " before chatting or you will be " + ChatColor.BOLD + "permbanned"
+                                + ChatColor.RED + " (Warning " + warnings.get(e.getPlayer()) + "/5)");
                 warnings.put(e.getPlayer(), warnings.get(e.getPlayer()) + 1);
                 e.setCancelled(true);
                 j.close();
@@ -203,28 +211,33 @@ public class Main extends JavaPlugin implements Listener {
         chatMessage.put("name", "[" + group + "] " + ChatColor.stripColor(name));
         chatMessage.put("message", ChatColor.stripColor(e.getMessage()));
 
-        j.publish("minecraft.chat.global.out", new JSONObject(chatMessage).toString());
-        String message = e.getMessage();
-        if (!perms.has(e.getPlayer(), "left4chat.format")) {
-            if (perms.has(e.getPlayer(), "left4chat.color")) {
-                String[] formats = {"&l", "&k", "&m", "&n", "&o"};
-                for (String format : formats) {
-                    while (message.contains(format)) {
-                        message = message.replace(format, "");
+        if (!e.isCancelled()) {
+            j.publish("minecraft.chat.global.out", new JSONObject(chatMessage).toString());
+            String message = e.getMessage();
+            if (!perms.has(e.getPlayer(), "left4chat.format")) {
+                if (perms.has(e.getPlayer(), "left4chat.color")) {
+                    String[] formats = { "&l", "&k", "&m", "&n", "&o" };
+                    for (String format : formats) {
+                        while (message.contains(format)) {
+                            message = message.replace(format, "");
+                        }
                     }
+                } else {
+                    message = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', message));
                 }
-            } else {
-                message = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', message));
             }
+            j.publish("minecraft.chat.global.in",
+                    String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + ChatColor.RESET + " " + message);
+            e.setCancelled(true);
+
         }
-        j.publish("minecraft.chat.global.in", String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + ChatColor.RESET + " " + message);
-        e.setCancelled(true);
+
         j.close();
     }
 
     @EventHandler
     public void onInvClick(InventoryClickEvent e) {
-        Player p = (Player)e.getWhoClicked();
+        Player p = (Player) e.getWhoClicked();
         moveTimes.put(p, System.currentTimeMillis());
         this.setAFK(p, false, true);
         if (e.getClickedInventory() != null && e.getView().getTitle().equals(InventoryGUI.getName())) {
@@ -233,22 +246,22 @@ public class Main extends JavaPlugin implements Listener {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("hub");
-                p.sendPluginMessage((Plugin)this, "BungeeCord", out.toByteArray());
+                p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
             } else if (clicked.getType() == Material.GRASS_BLOCK) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("survival");
-                p.sendPluginMessage((Plugin)this, "BungeeCord", out.toByteArray());
+                p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
             } else if (clicked.getType() == Material.DIAMOND) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("creative");
-                p.sendPluginMessage((Plugin)this, "BungeeCord", out.toByteArray());
+                p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
             } else if (clicked.getType() == Material.ZOMBIE_HEAD) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("zombies");
-                p.sendPluginMessage((Plugin)this, "BungeeCord", out.toByteArray());
+                p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
             }
             p.closeInventory();
             p.updateInventory();
@@ -259,14 +272,16 @@ public class Main extends JavaPlugin implements Listener {
                 p.sendMessage(ChatColor.GREEN + "Account Verified! You may now chat freely.");
                 p.closeInventory();
                 p.updateInventory();
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "lp user " + p.getName() + " permission set left4chat.verified");
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
+                        "lp user " + p.getName() + " permission set left4chat.verified");
             } else {
                 p.sendMessage(ChatColor.RED + "Incorrect CAPTCHA response!");
                 p.closeInventory();
                 p.updateInventory();
                 Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
                 j.auth(Main.plugin.getConfig().getString("redispass"));
-                j.publish("minecraft.console.hub.in", "kick " + e.getWhoClicked().getName() + " Incorrect CAPTCHA solution");
+                j.publish("minecraft.console.hub.in",
+                        "kick " + e.getWhoClicked().getName() + " Incorrect CAPTCHA solution");
                 j.close();
             }
             e.setCancelled(true);
@@ -275,7 +290,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        Player p = (Player)e.getPlayer();
+        Player p = (Player) e.getPlayer();
         if (VerifyCommand.playerVerifying(p)) {
             p.sendMessage(ChatColor.RED + "Kicked for incorrect CAPTCHA response!");
             Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
@@ -286,12 +301,13 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     private JedisPubSub subscribe() {
-        final JedisPubSub jedisPubSub = new JedisPubSub(){
+        final JedisPubSub jedisPubSub = new JedisPubSub() {
 
             @Override
             public void onMessage(String channel, String message) {
                 if (channel.equals("minecraft.chat.global.in")) {
-                    Main.this.getServer().broadcastMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)message));
+                    Main.this.getServer()
+                            .broadcastMessage(ChatColor.translateAlternateColorCodes((char) '&', (String) message));
                 } else if (channel.equals("minecraft.chat.messages")) {
                     Main.this.getLogger().info("Message: " + message);
                     String sender = message.split(",")[0];
@@ -303,23 +319,27 @@ public class Main extends JavaPlugin implements Listener {
                     contents = contents.substring(0, contents.length() - 1);
                     Collection<? extends Player> players = Bukkit.getOnlinePlayers();
                     for (Player p : players) {
-                        if (!p.getName().equalsIgnoreCase(reciever)) continue;
+                        if (!p.getName().equalsIgnoreCase(reciever))
+                            continue;
 
                         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
                         jedis.auth(Main.plugin.getConfig().getString("redispass"));
 
                         JSONArray globalPlayers = new JSONArray(jedis.get("minecraft.players"));
                         for (int i = 0; i < globalPlayers.length(); i++) {
-                            if (!globalPlayers.getJSONObject(i).getString("username").equalsIgnoreCase(sender)) continue;
-                            String nick = Nicky.getNickDatabase().downloadNick(globalPlayers.getJSONObject(i).getString("uuid"));
+                            if (!globalPlayers.getJSONObject(i).getString("username").equalsIgnoreCase(sender))
+                                continue;
+                            String nick = Nicky.getNickDatabase()
+                                    .downloadNick(globalPlayers.getJSONObject(i).getString("uuid"));
                             if (nick == null) {
                                 nick = sender;
                             }
-                            p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6" + nick + " &c-> &6You&c]&r " + contents)));
+                            p.sendMessage(ChatColor.translateAlternateColorCodes((char) '&',
+                                    (String) ("&c[&6" + nick + " &c-> &6You&c]&r " + contents)));
                             p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
                         }
 
-                        if(jedis.get("minecraft.chat.replies") == null) {
+                        if (jedis.get("minecraft.chat.replies") == null) {
                             jedis.set("minecraft.chat.replies", "{}");
                         }
                         JSONObject replies = new JSONObject(jedis.get("minecraft.chat.replies"));
@@ -330,19 +350,18 @@ public class Main extends JavaPlugin implements Listener {
                 }
             }
         };
-        new Thread(new Runnable(){
+        new Thread(new Runnable() {
 
             @Override
             public void run() {
                 try {
                     Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
                     jedis.auth(Main.plugin.getConfig().getString("redispass"));
-                                jedis.subscribe(jedisPubSub, "minecraft.chat.global.in", "minecraft.chat.messages");
+                    jedis.subscribe(jedisPubSub, "minecraft.chat.global.in", "minecraft.chat.messages");
                     Main.this.getLogger().warning("Subscriber closed!");
                     jedis.quit();
                     jedis.close();
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
@@ -362,7 +381,8 @@ public class Main extends JavaPlugin implements Listener {
             afkPlayers.remove(p);
             Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
             afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            if(afkList.contains(p.getName())) afkList.remove(p.getName());
+            if (afkList.contains(p.getName()))
+                afkList.remove(p.getName());
             jedis.set("minecraft.afkplayers", String.join(",", afkList));
             jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk");
             jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is no longer afk.");
@@ -376,7 +396,8 @@ public class Main extends JavaPlugin implements Listener {
             jedis.publish("minecraft.chat.global.out", ":exclamation: " + name + " is now afk.");
             perms.playerAdd(p, "harbor.bypass");
         }
-        jedis.set("minecraft.afkplayers", String.join((CharSequence)",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
+        jedis.set("minecraft.afkplayers",
+                String.join((CharSequence) ",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
         jedis.close();
     }
 
@@ -384,7 +405,7 @@ public class Main extends JavaPlugin implements Listener {
         String name = p.getName();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
         jedis.auth(Main.plugin.getConfig().getString("redispass"));
-        
+
         if (afk && !afkPlayers.contains(p)) {
             afkPlayers.add(p);
             Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
@@ -399,7 +420,8 @@ public class Main extends JavaPlugin implements Listener {
             afkPlayers.remove(p);
             Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
             afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            if(afkList.contains(p.getName())) afkList.remove(p.getName());
+            if (afkList.contains(p.getName()))
+                afkList.remove(p.getName());
             jedis.set("minecraft.afkplayers", String.join(",", afkList));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
@@ -423,4 +445,3 @@ public class Main extends JavaPlugin implements Listener {
     }
 
 }
-
