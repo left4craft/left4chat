@@ -15,9 +15,7 @@ import me.sisko.left4chat.commands.MessageTabComplete;
 import me.sisko.left4chat.commands.ReloadCommand;
 import me.sisko.left4chat.commands.ReplyCommand;
 import me.sisko.left4chat.commands.VerifyCommand;
-import me.sisko.left4chat.sql.AsyncFixCoins;
 import me.sisko.left4chat.sql.AsyncKeepAlive;
-import me.sisko.left4chat.sql.AsyncUserUpdate;
 import me.sisko.left4chat.sql.SQLManager;
 
 import java.sql.Connection;
@@ -49,6 +47,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -124,12 +123,12 @@ public class Main extends JavaPlugin implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         e.setJoinMessage(null);
-        new AsyncFixCoins(getSQL(), e.getPlayer()).runTaskLaterAsynchronously(this, 20);
-        try {
-            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
-        } catch (Exception e2) {
-            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
-        }
+        // new AsyncFixCoins(getSQL(), e.getPlayer()).runTaskLaterAsynchronously(this, 20);
+        // try {
+        //     new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
+        // } catch (Exception e2) {
+        //     new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
+        // }
     }
 
     @EventHandler
@@ -150,9 +149,32 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     @EventHandler
-    public void onCommand(PlayerCommandPreprocessEvent e) {
+    public void onPlayerCommand(PlayerCommandPreprocessEvent e) {
         moveTimes.put(e.getPlayer(), System.currentTimeMillis());
         this.setAFK(e.getPlayer(), false, true);
+
+        if(e.getMessage().equalsIgnoreCase("stop")) {
+            for(Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(ChatColor.RED + "The server you were on is restarting, so you have been moved to hub.");
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("Connect");
+                out.writeUTF("hub");
+                p.sendPluginMessage((Plugin) plugin, "BungeeCord", out.toByteArray());  
+              }
+        }
+    }
+
+    @EventHandler
+    public void onServerCommand(ServerCommandEvent e) {
+        if(e.getCommand().equalsIgnoreCase("stop")) {
+            for(Player p : Bukkit.getOnlinePlayers()) {
+                p.sendMessage(ChatColor.RED + "The server you were on is restarting, so you have been moved to hub.");
+                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                out.writeUTF("Connect");
+                out.writeUTF("hub");
+                p.sendPluginMessage((Plugin) plugin, "BungeeCord", out.toByteArray());  
+              }
+        }
     }
 
     @EventHandler
@@ -243,25 +265,25 @@ public class Main extends JavaPlugin implements Listener {
         this.setAFK(p, false, true);
         if (e.getClickedInventory() != null && e.getView().getTitle().equals(InventoryGUI.getName())) {
             ItemStack clicked = e.getCurrentItem();
-            if (clicked.getType() == Material.NETHER_STAR) {
+            if (clicked != null && clicked.getType() == Material.NETHER_STAR) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("hub");
                 p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
-            } else if (clicked.getType() == Material.GRASS_BLOCK) {
+            } else if (clicked != null && clicked.getType() == Material.GRASS_BLOCK) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("survival");
                 p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
-            } else if (clicked.getType() == Material.DIAMOND) {
+            } else if (clicked != null && clicked.getType() == Material.DIAMOND) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
                 out.writeUTF("creative");
                 p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
-            } else if (clicked.getType() == Material.ZOMBIE_HEAD) {
+            } else if (clicked != null && clicked.getType() == Material.SNOWBALL) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
-                out.writeUTF("zombies");
+                out.writeUTF("paintball");
                 p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
             }
             p.closeInventory();
@@ -443,6 +465,14 @@ public class Main extends JavaPlugin implements Listener {
 
     public static void ReconnectSQL() {
         connection = SQLManager.connect();
+    }
+
+    public static boolean promoteToUser(Player p) {
+        if(!perms.has(p, "group.user")) {
+            perms.playerAdd(null, p, "group.user");
+            return true;
+        }
+        return false;
     }
 
 }

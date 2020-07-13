@@ -19,11 +19,13 @@ public class AsyncUserUpdate
 extends BukkitRunnable {
     private Connection connection;
     private String world;
+    private Player p;
     private OfflinePlayer op;
     private String nick;
 
     public AsyncUserUpdate setup(Connection connection, Player p) {
         this.connection = connection;
+        this.p = p;
         this.op = Bukkit.getOfflinePlayer((UUID)p.getUniqueId());
         this.world = p.getWorld().getName();
         this.nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)p.getDisplayName()));
@@ -46,7 +48,8 @@ extends BukkitRunnable {
                 JSONObject groupCommand = new JSONObject();
                 groupCommand.put("command", "setgroup");
                 groupCommand.put("id", id);
-                groupCommand.put("group", Main.getGroup(this.world, this.op).toLowerCase());
+                String group = Main.getGroup(this.world, this.op).toLowerCase();
+                groupCommand.put("group", group.equals("guest") ? "user" : group);
 
                 Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
                 j.auth(Main.plugin.getConfig().getString("redispass"));
@@ -54,6 +57,11 @@ extends BukkitRunnable {
                 j.publish("discord.botcommands", nickCommand.toString());
                 j.publish("discord.botcommands", groupCommand.toString());
                 Main.plugin.getLogger().info("Connected Minecraft Account " + this.op.getName() + " to discord account " + id);
+
+                if(Main.promoteToUser(p)) {
+                    Main.plugin.getLogger().info("Promoted " + this.op.getName() + " to user.");
+                }
+
                 j.close();
             } else {
                 Main.plugin.getLogger().info("Could not find Discord account for " + this.op.getName());

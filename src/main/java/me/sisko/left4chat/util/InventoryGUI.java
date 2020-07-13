@@ -32,12 +32,12 @@ public class InventoryGUI {
         meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_UNBREAKABLE});
         diamond.setItemMeta(meta);
         inv.setItem(4, diamond);
-        ItemStack zombie = new ItemStack(Material.ZOMBIE_HEAD);
-        meta = zombie.getItemMeta();
-        meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Zombies");
+        ItemStack paintball = new ItemStack(Material.SNOWBALL);
+        meta = paintball.getItemMeta();
+        meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Paintball");
         meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_UNBREAKABLE});
-        zombie.setItemMeta(meta);
-        inv.setItem(6, zombie);
+        paintball.setItemMeta(meta);
+        inv.setItem(6, paintball);
         ItemStack barrier = new ItemStack(Material.BARRIER);
         meta = barrier.getItemMeta();
         meta.setDisplayName(ChatColor.RED + "" + ChatColor.BOLD + "Exit Menu");

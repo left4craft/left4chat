@@ -26,12 +26,12 @@ public class AsyncFixCoins extends BukkitRunnable {
 			ResultSet rs = conn.createStatement().executeQuery("SELECT Coins FROM ProCosmeticsData WHERE UUID=\"" + p.getUniqueId() + "\";");
 			if (rs.next()) {
 				int coins = rs.getInt("Coins");
-				execute("pc setcoins " + p.getName() + " " + coins);
+				execute("pc set coins " + p.getName() + " " + coins);
 				rs = conn.createStatement().executeQuery("SELECT " + String.join(",", tiers) + " FROM ProCosmeticsData WHERE UUID=\"" + p.getUniqueId() + "\";");
 				if (rs.next()) {
 					for (String tier : tiers) {
 						int keys = rs.getInt(tier);
-						execute("pc treasure set " + p.getName() + " " + tier.substring(0, tier.length()-9) + " " + keys);
+						execute("pc set treasures " + p.getName() + " " + tier.substring(0, tier.length()-9) + " " + keys);
 					}
 				}
 			} else {
