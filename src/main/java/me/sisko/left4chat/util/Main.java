@@ -16,6 +16,7 @@ import me.sisko.left4chat.commands.ReloadCommand;
 import me.sisko.left4chat.commands.ReplyCommand;
 import me.sisko.left4chat.commands.VerifyCommand;
 import me.sisko.left4chat.sql.AsyncKeepAlive;
+import me.sisko.left4chat.sql.AsyncUserUpdate;
 import me.sisko.left4chat.sql.SQLManager;
 
 import java.sql.Connection;
@@ -124,11 +125,11 @@ public class Main extends JavaPlugin implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         e.setJoinMessage(null);
         // new AsyncFixCoins(getSQL(), e.getPlayer()).runTaskLaterAsynchronously(this, 20);
-        // try {
-        //     new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
-        // } catch (Exception e2) {
-        //     new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
-        // }
+        try {
+            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
+        } catch (Exception e2) {
+            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
+        }
     }
 
     @EventHandler
