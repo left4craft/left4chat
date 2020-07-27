@@ -18,7 +18,7 @@ commands:
     usage: /msg <player> <message>
     aliases: [m, tell, pm, message, w, whisper]
   reply:
-    description: Replies to the last recieved message
+    description: Replies to the last received message
     usage: /reply <message>
     aliases: [r]
   afk:
