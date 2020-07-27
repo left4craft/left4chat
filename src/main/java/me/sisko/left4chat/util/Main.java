@@ -338,7 +338,7 @@ public class Main extends JavaPlugin implements Listener {
 
                     JSONObject json = new JSONObject(message);
 
-                    Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + "->" + json.getString("to_name") + "] " + json.getString("message"));
+                    Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + " -> " + json.getString("to_name") + "] " + json.getString("message"));
 
                     Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
                     if(reciever != null) reciever.sendMessage(ChatColor.translateAlternateColorCodes((char) '&', "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r " + json.getString("message")));
