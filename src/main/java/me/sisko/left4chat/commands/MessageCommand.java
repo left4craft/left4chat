@@ -52,13 +52,14 @@ implements CommandExecutor {
             for(int i = 0; i < players.length(); i++) {
                 JSONObject player = players.getJSONObject(i);
                 String name = player.getString("username");
+                String uuid = player.getString("uuid");
 
                 if(name.equalsIgnoreCase(reciever)) {
-                    this.sendMessage(p, name, message);
+                    this.sendMessage(p, name, uuid, message);
                     return true;
                 }
                 if (!name.toLowerCase().startsWith(reciever.toLowerCase())) continue;
-                possibleUsers.add(name);
+                possibleUsers.add(name + "," + uuid);
             }
             // players.forEach((Objet player) -> {
             //     String player = arrstring[i];
@@ -75,16 +76,17 @@ implements CommandExecutor {
             for(int i = 0; i < players.length(); i++) {
                 JSONObject player = players.getJSONObject(i);
                 String name = player.getString("username");
+                String uuid = player.getString("uuid");
 
-                String nickColor = Nicky.getNickDatabase().downloadNick(player.getString("uuid"));
+                String nickColor = Nicky.getNickDatabase().downloadNick(uuid);
                 if (nickColor == null) continue;
                 String nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)nickColor));
                 if (reciever.equalsIgnoreCase(nick)) {
-                    this.sendMessage(p, name, message);
+                    this.sendMessage(p, name, uuid, message);
                     return true;
                 }
                 if (nick.toLowerCase().startsWith(reciever.toLowerCase())) {
-                    possibleUsers.add(name);
+                    possibleUsers.add(name + "," + uuid);
                 }
                 usernameNickname.put(name, nickColor);
             }
@@ -98,13 +100,16 @@ implements CommandExecutor {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
             } else {
                 if (possibleUsers.size() == 1) {
-                    this.sendMessage(p, (String)possibleUsers.get(0), message);
+                    String[] player = possibleUsers.get(0).split(",");
+                    this.sendMessage(p, player[0], player[1], message);
                     return true;
                 }
                 String error = ChatColor.RED + "Ambiguous recipient \"" + reciever + "\", do you mean: \n";
-                for (String possible : possibleUsers) {
-                    error = String.valueOf(error) + ChatColor.GOLD + "- " + possible;
-                    if (usernameNickname.containsKey(possible)) {
+                for (String possible : possibleUsers) { 
+                    String[] player = possible.split(",");
+
+                    error = String.valueOf(error) + ChatColor.GOLD + "- " + player[0];
+                    if (usernameNickname.containsKey(player[0])) {
                         error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(possible))) + ChatColor.GOLD + ")";
                     }
                     error = String.valueOf(error) + "\n";
@@ -116,8 +121,10 @@ implements CommandExecutor {
         return true;
     }
 
-    private void sendMessage(Player p, String name, String message) {
+    private void sendMessage(Player p, String name, String uuid, String message) {
         Permission perms = Main.plugin.getPerms();
+
+        // TODO replace with call to new color code
         if (!perms.has(p, "left4chat.format")) {
             if (perms.has(p, "left4chat.color")) {
                 String[] formats = new String[]{"&l", "&k", "&m", "&n", "&o"};
@@ -134,33 +141,47 @@ implements CommandExecutor {
         j.auth(Main.plugin.getConfig().getString("redispass"));
         
         JSONArray players = new JSONArray(j.get("minecraft.players"));
+        JSONArray afkPlayers = new JSONArray(j.get("minecraft.afkplayers"));
 
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
 
 
-            if (!player.getString("username").equalsIgnoreCase(name)) continue;
+            if (!player.getString("uuid").equalsIgnoreCase(uuid)) continue;
 
-            String nick = Nicky.getNickDatabase().downloadNick(player.getString("uuid"));
+            String nick = Nicky.getNickDatabase().downloadNick(uuid);
             if (nick == null) {
                 nick = name;
             }
             p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6You &c-> &6" + nick + "&c]&r " + message)));
             boolean afk = false;
-            if(j.get("minecraft.afkplayers") == null) {
-                j.set("minecraft.afkplayers", "");
+            // if(j.get("minecraft.afkplayers") == null) {
+            //     j.set("minecraft.afkplayers", "");
+            // }
+            // for (String afkPlayer : j.get("minecraft.afkplayers").split(",")) {
+            //     if (!afkPlayer.equalsIgnoreCase(name)) continue;
+            //     afk = true;
+            // }
+
+            for(int k = 0; k < afkPlayers.length(); k++) {
+                if(afkPlayers.getJSONObject(k).getString("uuid").equalsIgnoreCase(uuid)) afk = true;
             }
-            for (String afkPlayer : j.get("minecraft.afkplayers").split(",")) {
-                if (!afkPlayer.equalsIgnoreCase(name)) continue;
-                afk = true;
-            }
+
             if (afk) {
                 p.sendMessage(ChatColor.RED + nick + ChatColor.RED + " is currently AFK and may not respond.");
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 0.5f);
             } else {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 2.0f);
             }
-            j.publish("minecraft.chat.messages", String.valueOf(p.getName()) + "," + name + "," + message);
+            JSONObject json = new JSONObject();
+            json.put("from", p.getUniqueId().toString());
+            json.put("to", uuid);
+            json.put("from_name", p.getName());
+            json.put("from_nick", p.getDisplayName());
+            json.put("to_name", name);
+            json.put("to_nick", nick);
+            json.put("message", message);
+            j.publish("minecraft.chat.global.out", json.toString());
             j.close();
             return;
         }

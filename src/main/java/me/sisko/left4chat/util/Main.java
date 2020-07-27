@@ -2,6 +2,8 @@ package me.sisko.left4chat.util;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.google.gson.JsonObject;
+
 import io.loyloy.nicky.Nick;
 import io.loyloy.nicky.Nicky;
 import me.sisko.left4chat.commands.AfkCommand;
@@ -26,6 +28,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import net.milkbowl.vault.chat.Chat;
@@ -335,43 +338,48 @@ public class Main extends JavaPlugin implements Listener {
                             .broadcastMessage(ChatColor.translateAlternateColorCodes((char) '&', (String) message));
                 } else if (channel.equals("minecraft.chat.messages")) {
                     Main.this.getLogger().info("Message: " + message);
-                    String sender = message.split(",")[0];
-                    String reciever = message.split(",")[1];
-                    String contents = "";
-                    for (int i = 2; i < message.split(",").length; ++i) {
-                        contents = String.valueOf(contents) + message.split(",")[i] + ",";
-                    }
-                    contents = contents.substring(0, contents.length() - 1);
-                    Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-                    for (Player p : players) {
-                        if (!p.getName().equalsIgnoreCase(reciever))
-                            continue;
 
-                        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
-                        jedis.auth(Main.plugin.getConfig().getString("redispass"));
+                    JSONObject json = new JSONObject(message);
+                    Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
+                    if(reciever != null) reciever.sendMessage(ChatColor.translateAlternateColorCodes((char) '&', "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r " + json.getString("message")));
 
-                        JSONArray globalPlayers = new JSONArray(jedis.get("minecraft.players"));
-                        for (int i = 0; i < globalPlayers.length(); i++) {
-                            if (!globalPlayers.getJSONObject(i).getString("username").equalsIgnoreCase(sender))
-                                continue;
-                            String nick = Nicky.getNickDatabase()
-                                    .downloadNick(globalPlayers.getJSONObject(i).getString("uuid"));
-                            if (nick == null) {
-                                nick = sender;
-                            }
-                            p.sendMessage(ChatColor.translateAlternateColorCodes((char) '&',
-                                    (String) ("&c[&6" + nick + " &c-> &6You&c]&r " + contents)));
-                            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
-                        }
+                    // String sender = message.split(",")[0];
+                    // String reciever = message.split(",")[1];
+                    // String contents = "";
+                    // for (int i = 2; i < message.split(",").length; ++i) {
+                    //     contents = String.valueOf(contents) + message.split(",")[i] + ",";
+                    // }
+                    // contents = contents.substring(0, contents.length() - 1);
+                    // Collection<? extends Player> players = Bukkit.getOnlinePlayers();
+                    // for (Player p : players) {
+                    //     if (!p.getName().equalsIgnoreCase(reciever))
+                    //         continue;
 
-                        if (jedis.get("minecraft.chat.replies") == null) {
-                            jedis.set("minecraft.chat.replies", "{}");
-                        }
-                        JSONObject replies = new JSONObject(jedis.get("minecraft.chat.replies"));
-                        replies.put(reciever, sender);
-                        jedis.set("minecraft.chat.replies", replies.toString());
-                        jedis.close();
-                    }
+                    //     Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                    //     jedis.auth(Main.plugin.getConfig().getString("redispass"));
+
+                    //     JSONArray globalPlayers = new JSONArray(jedis.get("minecraft.players"));
+                    //     for (int i = 0; i < globalPlayers.length(); i++) {
+                    //         if (!globalPlayers.getJSONObject(i).getString("username").equalsIgnoreCase(sender))
+                    //             continue;
+                    //         String nick = Nicky.getNickDatabase()
+                    //                 .downloadNick(globalPlayers.getJSONObject(i).getString("uuid"));
+                    //         if (nick == null) {
+                    //             nick = sender;
+                    //         }
+                            // p.sendMessage(ChatColor.translateAlternateColorCodes((char) '&',
+                            //         (String) ("&c[&6" + nick + " &c-> &6You&c]&r " + contents)));
+                    //         p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
+                    //     }
+
+                    //     if (jedis.get("minecraft.chat.replies") == null) {
+                    //         jedis.set("minecraft.chat.replies", "{}");
+                    //     }
+                    //     JSONObject replies = new JSONObject(jedis.get("minecraft.chat.replies"));
+                    //     replies.put(reciever, sender);
+                    //     jedis.set("minecraft.chat.replies", replies.toString());
+                    //     jedis.close();
+                    // }
                 }
             }
         };
