@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import me.sisko.left4chat.util.Main;
+import me.sisko.left4chat.util.Colors;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -78,7 +79,7 @@ implements CommandExecutor {
 
                 String nickColor = Nicky.getNickDatabase().downloadNick(player.getString("uuid"));
                 if (nickColor == null) continue;
-                String nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)nickColor));
+                String nick = Colors.strip(nickColor);
                 if (reciever.equalsIgnoreCase(nick)) {
                     this.sendMessage(p, name, message);
                     return true;
@@ -105,7 +106,7 @@ implements CommandExecutor {
                 for (String possible : possibleUsers) {
                     error = String.valueOf(error) + ChatColor.GOLD + "- " + possible;
                     if (usernameNickname.containsKey(possible)) {
-                        error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(possible))) + ChatColor.GOLD + ")";
+                        error = String.valueOf(error) + " (Nickname: " + Colors.format((String)("&r" + (String)usernameNickname.get(possible))) + ChatColor.GOLD + ")";
                     }
                     error = String.valueOf(error) + "\n";
                 }
@@ -118,18 +119,10 @@ implements CommandExecutor {
 
     private void sendMessage(Player p, String name, String message) {
         Permission perms = Main.plugin.getPerms();
-        if (!perms.has(p, "left4chat.format")) {
-            if (perms.has(p, "left4chat.color")) {
-                String[] formats = new String[]{"&l", "&k", "&m", "&n", "&o"};
-                for (String format : formats) {
-                    while (message.contains(format)) {
-                        message = message.replace(format, "");
-                    }
-                }
-            } else {
-                message = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)message));
-            }
-        }
+		
+		message = Colors.formatWithPerm(perms.has(p, "left4chat.format"), 
+		perms.has(p, "left4chat.color"), message);
+
         Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         

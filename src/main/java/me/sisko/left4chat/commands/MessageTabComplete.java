@@ -2,6 +2,7 @@ package me.sisko.left4chat.commands;
 
 import io.loyloy.nicky.Nicky;
 import me.sisko.left4chat.util.Main;
+import me.sisko.left4chat.util.Colors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +34,7 @@ implements TabCompleter {
             for (String uuid : uuids) {
                 String nick = Nicky.getNickDatabase().downloadNick(uuid);
                 if (nick == null) continue;
-                tabComplete.add(ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)nick)));
+                tabComplete.add(Colors.strip(nick));
             }
             tabComplete.removeIf(s -> !s.toLowerCase().startsWith(args[0].toLowerCase()));
             if (tabComplete.size() == 0) {
