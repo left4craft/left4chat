@@ -138,7 +138,7 @@ implements CommandExecutor {
             if (nick == null) {
                 nick = name;
             }
-            p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6You &c-> &6" + nick + "&c]&r " + message)));
+            p.sendMessage(Colors.format("&c[&6You &c-> &6" + nick + "&c]&r " + message));
             boolean afk = false;
             if(j.get("minecraft.afkplayers") == null) {
                 j.set("minecraft.afkplayers", "");
