@@ -2,8 +2,8 @@ package me.sisko.left4chat.util;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+
 import io.loyloy.nicky.Nick;
-import io.loyloy.nicky.Nicky;
 import me.sisko.left4chat.commands.AfkCommand;
 import me.sisko.left4chat.commands.AnnounceCommand;
 import me.sisko.left4chat.commands.DiscordCommand;
@@ -20,13 +20,8 @@ import me.sisko.left4chat.sql.AsyncUserUpdate;
 import me.sisko.left4chat.sql.SQLManager;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
@@ -34,8 +29,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.Sound;
-import org.bukkit.SoundCategory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -54,6 +47,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import redis.clients.jedis.Jedis;
@@ -64,7 +58,6 @@ public class Main extends JavaPlugin implements Listener {
     private static Connection connection;
     private static Permission perms;
     private static Chat chat;
-    private static ArrayList<Player> afkPlayers;
     private static HashMap<Player, Long> moveTimes;
     private static HashMap<Player, Integer> warnings;
 
@@ -89,7 +82,6 @@ public class Main extends JavaPlugin implements Listener {
         this.getCommand("chatlock").setExecutor(new LockdownCommand());
         this.getCommand("chatreload").setExecutor(new ReloadCommand());
 
-        afkPlayers = new ArrayList<Player>();
         moveTimes = new HashMap<Player, Long>();
         warnings = new HashMap<Player, Integer>();
         RegisteredServiceProvider<Permission> rspPerm = this.getServer().getServicesManager()
@@ -324,43 +316,17 @@ public class Main extends JavaPlugin implements Listener {
                 if (channel.equals("minecraft.chat.global.in")) {
                     Main.this.getServer().broadcastMessage(Colors.format(message));
                 } else if (channel.equals("minecraft.chat.messages")) {
-                    Main.this.getLogger().info("Message: " + message);
-                    String sender = message.split(",")[0];
-                    String reciever = message.split(",")[1];
-                    String contents = "";
-                    for (int i = 2; i < message.split(",").length; ++i) {
-                        contents = String.valueOf(contents) + message.split(",")[i] + ",";
-                    }
-                    contents = contents.substring(0, contents.length() - 1);
-                    Collection<? extends Player> players = Bukkit.getOnlinePlayers();
-                    for (Player p : players) {
-                        if (!p.getName().equalsIgnoreCase(reciever))
-                            continue;
+                    try {
+                    JSONObject json = new JSONObject(message);
 
-                        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
-                        jedis.auth(Main.plugin.getConfig().getString("redispass"));
+                    Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + " -> " + json.getString("to_name") + "] " + json.getString("message"));
 
-                        JSONArray globalPlayers = new JSONArray(jedis.get("minecraft.players"));
-                        for (int i = 0; i < globalPlayers.length(); i++) {
-                            if (!globalPlayers.getJSONObject(i).getString("username").equalsIgnoreCase(sender))
-                                continue;
-                            String nick = Nicky.getNickDatabase()
-                                    .downloadNick(globalPlayers.getJSONObject(i).getString("uuid"));
-                            if (nick == null) {
-                                nick = sender;
-							}
-							p.sendMessage(Colors.formatWithPerm(perms.has(p, "left4chat.format"), perms.has(p, "left4chat.color"),
-							(String) ("&c[&6" + nick + " &c-> &6You&c]&r " +  contents)));
-                            p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 1.5f);
-                        }
+                    Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
+                    if(reciever != null) reciever.sendMessage(ChatColor.translateAlternateColorCodes((char) '&', "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r " + json.getString("message")));
 
-                        if (jedis.get("minecraft.chat.replies") == null) {
-                            jedis.set("minecraft.chat.replies", "{}");
-                        }
-                        JSONObject replies = new JSONObject(jedis.get("minecraft.chat.replies"));
-                        replies.put(reciever, sender);
-                        jedis.set("minecraft.chat.replies", replies.toString());
-                        jedis.close();
+                    } catch (JSONException e) {
+                        getLogger().warning("Invalid JSON sent in minecraft.chat.messages: " + message);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -389,69 +355,75 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public void toggleAfk(Player p) {
-        String name = p.getName();
+        setAFK(p, !isAFK(p), true);
+    }
+    
+    private boolean isAFK(Player p) {
+        String uuid = p.getUniqueId().toString();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-		JSONObject json = new JSONObject();
-		json.put("type", "afk");
-		json.put("name", name);
-
-        if (afkPlayers.contains(p)) {
-            afkPlayers.remove(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            if (afkList.contains(p.getName()))
-                afkList.remove(p.getName());
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-			jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk");
-			json.put("afk", false);
-            jedis.publish("minecraft.chat.global.out", json.toString());
-            perms.playerRemove(p, "sleepmost.exempt");
-        } else {
-            afkPlayers.add(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-            jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk");
-            json.put("afk", true);
-            jedis.publish("minecraft.chat.global.out", json.toString());
-            perms.playerAdd(p, "sleepmost.exempt");
+        String jsonStr = jedis.get("minecraft.afk");
+        if(jsonStr == null) {
+            jedis.set("minecraft.afk", "[]");
+            jsonStr = "[]";
         }
-        jedis.set("minecraft.afkplayers",
-                String.join((CharSequence) ",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
+
+        JSONArray afk = new JSONArray(jsonStr);
+
         jedis.close();
+
+        for(int i = 0; i < afk.length(); i++) {
+            if(afk.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) return true;
+        }
+        return false;
     }
 
     public void setAFK(Player p, boolean afk, boolean verbose) {
-        String name = p.getName();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-		JSONObject json = new JSONObject();
-		json.put("type", "afk");
-		json.put("name", name);
+        String name = p.getName();
 
-        if (afk && !afkPlayers.contains(p)) {
-            afkPlayers.add(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-            if (verbose) {
-                jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
-                json.put("afk", true);
-            	jedis.publish("minecraft.chat.global.out", json.toString());
+        JSONObject msg = new JSONObject();
+		msg.put("type", "afk");
+        msg.put("name",name);
+        
+        String jsonStr = jedis.get("minecraft.afk");
+        if(jsonStr == null) {
+            jedis.set("minecraft.afk", "[]");
+            jsonStr = "[]";
+        }
+
+        JSONArray json = new JSONArray(jsonStr);
+
+        boolean afkInJedis = false;
+        int jedisIndex = -1;
+        for(int i = 0; i < json.length(); i++) {
+            if(json.getJSONObject(i).getString("uuid").equalsIgnoreCase(p.getUniqueId().toString())) {
+                afkInJedis = true;
+                jedisIndex = i;
+            }
+        }
+
+        if (afk) {
+            if(!afkInJedis) {
+                json.put(new JSONObject().put("name", p.getName()).put("uuid", p.getUniqueId().toString()));
+                jedis.set("minecraft.afk", json.toString());
+                if (verbose) {
+                    jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
+                    msg.put("afk", true);
+                    jedis.publish("minecraft.chat.global.out", msg.toString());
+                }
             }
             perms.playerAdd(p, "sleepmost.exempt");
-        } else if (!afk && afkPlayers.contains(p)) {
-            afkPlayers.remove(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            if (afkList.contains(p.getName()))
-                afkList.remove(p.getName());
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-            if (verbose) {
-                jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
-                json.put("afk", false);
-            	jedis.publish("minecraft.chat.global.out", json.toString());
+        } else if (!afk) {
+            if(afkInJedis) {
+                json.remove(jedisIndex);
+                jedis.set("minecraft.afk", json.toString());
+                if (verbose) {
+                    jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
+                    msg.put("afk", false);
+                    jedis.publish("minecraft.chat.global.out", msg.toString());
+                }
             }
             perms.playerRemove(p, "sleepmost.exempt");
         }

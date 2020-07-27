@@ -1,7 +1,7 @@
 name: Left4Chat
 main: me.sisko.left4chat.util.Main
-version: 1.6
-api-version: 1.14
+version: 1.7
+api-version: 1.16
 depend: [Vault, Nicky]
 commands:
   discord:
