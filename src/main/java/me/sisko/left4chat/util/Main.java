@@ -67,7 +67,6 @@ public class Main extends JavaPlugin implements Listener {
     private static Connection connection;
     private static Permission perms;
     private static Chat chat;
-    private static ArrayList<Player> afkPlayers;
     private static HashMap<Player, Long> moveTimes;
     private static HashMap<Player, Integer> warnings;
 
@@ -407,69 +406,52 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public void toggleAfk(Player p) {
-        String name = p.getName();
+        setAFK(p, !isAFK(p), true);
+    }
+    
+    private boolean isAFK(Player p) {
+        String uuid = p.getUniqueId().toString();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-		HashMap<String, String> msg = new HashMap<String, String>();
-		msg.put("type", "afk");
-		msg.put("name", name);
 
-        if (afkPlayers.contains(p)) {
-            afkPlayers.remove(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            if (afkList.contains(p.getName()))
-                afkList.remove(p.getName());
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-			jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk");
-			msg.put("afk", "false");
-            jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
-            perms.playerRemove(p, "sleepmost.exempt");
-        } else {
-            afkPlayers.add(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-            jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk");
-            msg.put("afk", "true");
-            jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
-            perms.playerAdd(p, "sleepmost.exempt");
-        }
-        jedis.set("minecraft.afkplayers",
-                String.join((CharSequence) ",", afkPlayers.stream().map(Player::getName).collect(Collectors.toList())));
+        JSONArray afk = new JSONArray(jedis.get("minecraft.afkplayers"));
+
         jedis.close();
+
+        for(int i = 0; i < afk.length(); i++) {
+            if(afk.getJSONObject(i).getString("uuid").equalsIgnoreCase(uuid)) return true;
+        }
+        return false;
     }
 
     public void setAFK(Player p, boolean afk, boolean verbose) {
-        String name = p.getName();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
 		HashMap<String, String> msg = new HashMap<String, String>();
 		msg.put("type", "afk");
-		msg.put("name", name);
+		msg.put("name", p.getName());
 
-        if (afk && !afkPlayers.contains(p)) {
-            afkPlayers.add(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-            if (verbose) {
-                jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
-                msg.put("afk", "true");
-            	jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
+        JSONArray json = new JSONArray(jedis.get("minecraft.afkplayers"));
+
+        boolean afkInJedis = false;
+        int jedisIndex = -1;
+        for(int i = 0; i < json.length(); i++) {
+            if(json.getJSONObject(i).getString("uuid").equalsIgnoreCase(p.getUniqueId().toString())) {
+                afkInJedis = true;
+                jedisIndex = i;
+            }
+        }
+
+        if (afk) {
+            if(!afkInJedis) {
+                json.put(new JSONObject().put("name", p.getName()).put("uuid", p.getUniqueId().toString()));
+                jedis.set("minecraft.afkplayers", json.toString());
             }
             perms.playerAdd(p, "sleepmost.exempt");
-        } else if (!afk && afkPlayers.contains(p)) {
-            afkPlayers.remove(p);
-            Set<String> afkList = new HashSet<String>(Arrays.asList(jedis.get("minecraft.afkplayers").split(",")));
-            afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
-            if (afkList.contains(p.getName()))
-                afkList.remove(p.getName());
-            jedis.set("minecraft.afkplayers", String.join(",", afkList));
-            if (verbose) {
-                jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
-                msg.put("afk", "false");
-            	jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
+        } else if (!afk) {
+            if(afkInJedis) {
+                json.remove(jedisIndex);
+                jedis.set("minecraft.afkplayers", json.toString());
             }
             perms.playerRemove(p, "sleepmost.exempt");
         }
