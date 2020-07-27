@@ -111,7 +111,7 @@ implements CommandExecutor {
 
                     error = String.valueOf(error) + ChatColor.GOLD + "- " + player[0];
                     if (usernameNickname.containsKey(player[0])) {
-                        error = String.valueOf(error) + " (Nickname: " + Colors.format("&r" + usernameNickname.get(player[0]))) + ChatColor.GOLD + ")";
+                        error = String.valueOf(error) + " (Nickname: " + Colors.format("&r" + usernameNickname.get(player[0])) + ChatColor.GOLD + ")";
                     }
                     error = String.valueOf(error) + "\n";
                 }
@@ -179,7 +179,7 @@ implements CommandExecutor {
             json.put("to_name", name);
             json.put("to_nick", nick);
             json.put("message", message);
-            j.publish("minecraft.chat.messages", json.toString());
+            j.publish("minecraft.chat", json.toString());
             j.close();
             return;
         }
