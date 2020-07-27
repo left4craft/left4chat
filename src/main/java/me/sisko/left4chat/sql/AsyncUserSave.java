@@ -4,11 +4,11 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.json.JSONObject;
 
 import me.sisko.left4chat.util.Main;
+import me.sisko.left4chat.util.Colors;
 import redis.clients.jedis.Jedis;
 
 public class AsyncUserSave extends BukkitRunnable {
@@ -28,7 +28,7 @@ public class AsyncUserSave extends BukkitRunnable {
     public AsyncUserSave setup(Connection connection, String uuid, String nick) {
         this.connection = connection;
         this.uuid = uuid;
-        this.nick = ChatColor.stripColor((String) ChatColor.translateAlternateColorCodes((char) '&', (String) nick));
+        this.nick = Colors.strip(nick);
         this.newId = null;
         return this;
     }

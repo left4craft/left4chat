@@ -6,8 +6,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.UUID;
 import me.sisko.left4chat.util.Main;
+import me.sisko.left4chat.util.Colors;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -28,7 +28,7 @@ extends BukkitRunnable {
         this.p = p;
         this.op = Bukkit.getOfflinePlayer((UUID)p.getUniqueId());
         this.world = p.getWorld().getName();
-        this.nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)p.getDisplayName()));
+        this.nick = Colors.strip(p.getDisplayName());
         return this;
     }
 

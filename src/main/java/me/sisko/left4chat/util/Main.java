@@ -221,30 +221,21 @@ public class Main extends JavaPlugin implements Listener {
         if (name == null) {
             name = e.getPlayer().getName();
         }
-        name = ChatColor.translateAlternateColorCodes('&', name);
+        name = Colors.format('&', name);
 		HashMap<String, String> chatMessage = new HashMap<String, String>();
 		chatMessage.put("type", "message");
         chatMessage.put("uuid", e.getPlayer().getUniqueId().toString());
-        chatMessage.put("name", "[" + group + "] " + ChatColor.stripColor(name));
-        chatMessage.put("message", ChatColor.stripColor(e.getMessage()));
+        chatMessage.put("name", "[" + group + "] " + Colors.strip(name));
+        chatMessage.put("message", Colors.strip(e.getMessage()));
 
         if (!e.isCancelled()) {
             j.publish("minecraft.chat.global.out", new JSONObject(chatMessage).toString());
             String message = e.getMessage();
-            if (!perms.has(e.getPlayer(), "left4chat.format")) {
-                if (perms.has(e.getPlayer(), "left4chat.color")) {
-                    String[] formats = { "&l", "&k", "&m", "&n", "&o" };
-                    for (String format : formats) {
-                        while (message.contains(format)) {
-                            message = message.replace(format, "");
-                        }
-                    }
-                } else {
-                    message = ChatColor.stripColor(ChatColor.translateAlternateColorCodes('&', message));
-                }
-            }
+
             j.publish("minecraft.chat.global.in",
-                    String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + ChatColor.RESET + " " + message);
+					String.valueOf(chat.getPlayerPrefix(e.getPlayer())) + name + ChatColor.RESET + " " + 
+					Colors.formatWithPerm(perms.has(e.getPlayer(), "left4chat.format"), 
+					perms.has(e.getPlayer(), "left4chat.color"), message));
             e.setCancelled(true);
 
         }
@@ -323,10 +314,8 @@ public class Main extends JavaPlugin implements Listener {
             @Override
             public void onMessage(String channel, String message) {
                 if (channel.equals("minecraft.chat.global.in")) {
-                    Main.this.getServer()
-                            .broadcastMessage(ChatColor.translateAlternateColorCodes((char) '&', (String) message));
+                    Main.this.getServer().broadcastMessage(Colors.format(message));
                 } else if (channel.equals("minecraft.chat.messages")) {
-
                     try {
                     JSONObject json = new JSONObject(message);
 
@@ -373,7 +362,6 @@ public class Main extends JavaPlugin implements Listener {
         String uuid = p.getUniqueId().toString();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-
         String jsonStr = jedis.get("minecraft.afk");
         if(jsonStr == null) {
             jedis.set("minecraft.afk", "[]");

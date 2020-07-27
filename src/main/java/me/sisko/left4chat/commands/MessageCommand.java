@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import me.sisko.left4chat.util.Main;
+import me.sisko.left4chat.util.Colors;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
@@ -80,7 +81,7 @@ implements CommandExecutor {
 
                 String nickColor = Nicky.getNickDatabase().downloadNick(uuid);
                 if (nickColor == null) continue;
-                String nick = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)nickColor));
+                String nick = Colors.strip(nickColor);
                 if (reciever.equalsIgnoreCase(nick)) {
                     this.sendMessage(p, name, uuid, message);
                     return true;
@@ -110,7 +111,7 @@ implements CommandExecutor {
 
                     error = String.valueOf(error) + ChatColor.GOLD + "- " + player[0];
                     if (usernameNickname.containsKey(player[0])) {
-                        error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(player[0]))) + ChatColor.GOLD + ")";
+                        error = String.valueOf(error) + " (Nickname: " + Colors.format("&r" + usernameNickname.get(player[0]))) + ChatColor.GOLD + ")";
                     }
                     error = String.valueOf(error) + "\n";
                 }
@@ -124,19 +125,10 @@ implements CommandExecutor {
     private void sendMessage(Player p, String name, String uuid, String message) {
         Permission perms = Main.plugin.getPerms();
 
-        // TODO replace with call to new color code
-        if (!perms.has(p, "left4chat.format")) {
-            if (perms.has(p, "left4chat.color")) {
-                String[] formats = new String[]{"&l", "&k", "&m", "&n", "&o"};
-                for (String format : formats) {
-                    while (message.contains(format)) {
-                        message = message.replace(format, "");
-                    }
-                }
-            } else {
-                message = ChatColor.stripColor((String)ChatColor.translateAlternateColorCodes((char)'&', (String)message));
-            }
-        }
+		
+		message = Colors.formatWithPerm(perms.has(p, "left4chat.format"), 
+		perms.has(p, "left4chat.color"), message);
+
         Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         
@@ -153,10 +145,7 @@ implements CommandExecutor {
             if (nick == null) {
                 nick = name;
             }
-
-            
-
-            p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6You &c-> &6" + nick + "&c]&r " + message)));
+            p.sendMessage(Colors.format("&c[&6You &c-> &6" + nick + "&c]&r " + message));
             boolean afk = false;
             // if(j.get("minecraft.afkplayers") == null) {
             //     j.set("minecraft.afkplayers", "");

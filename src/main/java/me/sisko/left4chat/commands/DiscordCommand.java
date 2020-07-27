@@ -5,6 +5,7 @@ import java.util.Iterator;
 import me.sisko.left4chat.sql.AsyncUserSave;
 import me.sisko.left4chat.sql.AsyncUserUpdate;
 import me.sisko.left4chat.util.Main;
+import me.sisko.left4chat.util.Colors;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -20,8 +21,7 @@ public class DiscordCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player p = (Player) sender;
             if (args.length == 0) {
-                p.sendMessage(ChatColor.translateAlternateColorCodes((char) '&',
-                        "&3[Discord&rSync&3] Join here &l\u00bb &b&ndiscord.left4craft.org"));
+                p.sendMessage(Colors.format("&#7289DA[Discord&fSync&#7289DA] Join here: &b&ndiscord.left4craft.org"));
             } else {
                 String jsonStr = Main.getCodes();
                 if (jsonStr == null) {

@@ -6,8 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.HashMap;
-import org.json.JSONObject;
+// import org.json.JSONObject;
 
 import me.sisko.left4chat.util.Main;
 import redis.clients.jedis.Jedis;
@@ -23,12 +22,12 @@ public class AnnounceCommand implements CommandExecutor {
             Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
 			j.auth(Main.plugin.getConfig().getString("redispass"));
 
-			HashMap<String, String> out = new HashMap<String, String>();
-			out.put("type", "broadcast");
-			out.put("message", ChatColor.stripColor(msg));
+			// JSONObject json = new JSONObject();
+			// json.put("type", "broadcast");
+			// json.put("message", ChatColor.stripColor(msg));
 
             j.publish("minecraft.chat.global.in", msg);
-            j.publish("minecraft.chat.global.out", new JSONObject(out).toString());
+            // j.publish("minecraft.chat.global.out", json.toString());
             j.close();
         } else {
             sender.sendMessage(ChatColor.RED + "Insufficient Permission.");
