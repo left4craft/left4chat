@@ -110,7 +110,7 @@ implements CommandExecutor {
 
                     error = String.valueOf(error) + ChatColor.GOLD + "- " + player[0];
                     if (usernameNickname.containsKey(player[0])) {
-                        error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(possible))) + ChatColor.GOLD + ")";
+                        error = String.valueOf(error) + " (Nickname: " + ChatColor.translateAlternateColorCodes((char)'&', (String)("&r" + (String)usernameNickname.get(player[0]))) + ChatColor.GOLD + ")";
                     }
                     error = String.valueOf(error) + "\n";
                 }

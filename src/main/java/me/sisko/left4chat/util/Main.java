@@ -57,6 +57,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import redis.clients.jedis.Jedis;
@@ -336,6 +337,7 @@ public class Main extends JavaPlugin implements Listener {
                             .broadcastMessage(ChatColor.translateAlternateColorCodes((char) '&', (String) message));
                 } else if (channel.equals("minecraft.chat.messages")) {
 
+                    try {
                     JSONObject json = new JSONObject(message);
 
                     Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + " -> " + json.getString("to_name") + "] " + json.getString("message"));
@@ -343,6 +345,10 @@ public class Main extends JavaPlugin implements Listener {
                     Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
                     if(reciever != null) reciever.sendMessage(ChatColor.translateAlternateColorCodes((char) '&', "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r " + json.getString("message")));
 
+                    } catch (JSONException e) {
+                        getLogger().warning("Invalid JSON sent in minecraft.chat.messages: " + message);
+                        e.printStackTrace();
+                    }
                     // String sender = message.split(",")[0];
                     // String reciever = message.split(",")[1];
                     // String contents = "";
