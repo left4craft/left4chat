@@ -91,7 +91,6 @@ public class Main extends JavaPlugin implements Listener {
         this.getCommand("chatlock").setExecutor(new LockdownCommand());
         this.getCommand("chatreload").setExecutor(new ReloadCommand());
 
-        afkPlayers = new ArrayList<Player>();
         moveTimes = new HashMap<Player, Long>();
         warnings = new HashMap<Player, Integer>();
         RegisteredServiceProvider<Permission> rspPerm = this.getServer().getServicesManager()
@@ -336,9 +335,11 @@ public class Main extends JavaPlugin implements Listener {
                     Main.this.getServer()
                             .broadcastMessage(ChatColor.translateAlternateColorCodes((char) '&', (String) message));
                 } else if (channel.equals("minecraft.chat.messages")) {
-                    Main.this.getLogger().info("Message: " + message);
 
                     JSONObject json = new JSONObject(message);
+
+                    Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + "->" + json.getString("to_name") + "] " + json.getString("message"));
+
                     Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
                     if(reciever != null) reciever.sendMessage(ChatColor.translateAlternateColorCodes((char) '&', "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r " + json.getString("message")));
 
@@ -414,7 +415,13 @@ public class Main extends JavaPlugin implements Listener {
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
 
-        JSONArray afk = new JSONArray(jedis.get("minecraft.afkplayers"));
+        String jsonStr = jedis.get("minecraft.afk");
+        if(jsonStr == null) {
+            jedis.set("minecraft.afk", "[]");
+            jsonStr = "[]";
+        }
+
+        JSONArray afk = new JSONArray(jsonStr);
 
         jedis.close();
 
@@ -427,11 +434,19 @@ public class Main extends JavaPlugin implements Listener {
     public void setAFK(Player p, boolean afk, boolean verbose) {
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-		HashMap<String, String> msg = new HashMap<String, String>();
-		msg.put("type", "afk");
-		msg.put("name", p.getName());
+        String name = p.getName();
 
-        JSONArray json = new JSONArray(jedis.get("minecraft.afkplayers"));
+        JSONObject msg = new JSONObject();
+		msg.put("type", "afk");
+        msg.put("name",name);
+        
+        String jsonStr = jedis.get("minecraft.afk");
+        if(jsonStr == null) {
+            jedis.set("minecraft.afk", "[]");
+            jsonStr = "[]";
+        }
+
+        JSONArray json = new JSONArray(jsonStr);
 
         boolean afkInJedis = false;
         int jedisIndex = -1;
@@ -445,13 +460,23 @@ public class Main extends JavaPlugin implements Listener {
         if (afk) {
             if(!afkInJedis) {
                 json.put(new JSONObject().put("name", p.getName()).put("uuid", p.getUniqueId().toString()));
-                jedis.set("minecraft.afkplayers", json.toString());
+                jedis.set("minecraft.afk", json.toString());
+                if (verbose) {
+                    jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
+                    msg.put("afk", true);
+                    jedis.publish("minecraft.chat.global.out", msg.toString());
+                }
             }
             perms.playerAdd(p, "sleepmost.exempt");
         } else if (!afk) {
             if(afkInJedis) {
                 json.remove(jedisIndex);
-                jedis.set("minecraft.afkplayers", json.toString());
+                jedis.set("minecraft.afk", json.toString());
+                if (verbose) {
+                    jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
+                    msg.put("afk", false);
+                    jedis.publish("minecraft.chat.global.out", msg.toString());
+                }
             }
             perms.playerRemove(p, "sleepmost.exempt");
         }

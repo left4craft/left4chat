@@ -141,7 +141,7 @@ implements CommandExecutor {
         j.auth(Main.plugin.getConfig().getString("redispass"));
         
         JSONArray players = new JSONArray(j.get("minecraft.players"));
-        JSONArray afkPlayers = new JSONArray(j.get("minecraft.afkplayers"));
+        JSONArray afkPlayers = new JSONArray(j.get("minecraft.afk"));
 
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
@@ -153,6 +153,9 @@ implements CommandExecutor {
             if (nick == null) {
                 nick = name;
             }
+
+            
+
             p.sendMessage(ChatColor.translateAlternateColorCodes((char)'&', (String)("&c[&6You &c-> &6" + nick + "&c]&r " + message)));
             boolean afk = false;
             // if(j.get("minecraft.afkplayers") == null) {
@@ -173,15 +176,21 @@ implements CommandExecutor {
             } else {
                 p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BLOCK_BIT, SoundCategory.PLAYERS, 5.0f, 2.0f);
             }
+
+            String from_nick = Nicky.getNickDatabase().downloadNick(p.getUniqueId().toString());
+            if (from_nick == null) {
+                from_nick = p.getName();
+            }
+
             JSONObject json = new JSONObject();
             json.put("from", p.getUniqueId().toString());
             json.put("to", uuid);
             json.put("from_name", p.getName());
-            json.put("from_nick", p.getDisplayName());
+            json.put("from_nick", from_nick);
             json.put("to_name", name);
             json.put("to_nick", nick);
             json.put("message", message);
-            j.publish("minecraft.chat.global.out", json.toString());
+            j.publish("minecraft.chat.messages", json.toString());
             j.close();
             return;
         }
