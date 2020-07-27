@@ -402,9 +402,9 @@ public class Main extends JavaPlugin implements Listener {
         String name = p.getName();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-		HashMap<String, String> msg = new HashMap<String, String>();
-		msg.put("type", "afk");
-		msg.put("name", name);
+		JSONObject json = new JSONObject();
+		json.put("type", "afk");
+		json.put("name", name);
 
         if (afkPlayers.contains(p)) {
             afkPlayers.remove(p);
@@ -414,8 +414,8 @@ public class Main extends JavaPlugin implements Listener {
                 afkList.remove(p.getName());
             jedis.set("minecraft.afkplayers", String.join(",", afkList));
 			jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk");
-			msg.put("afk", "false");
-            jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
+			json.put("afk", false);
+            jedis.publish("minecraft.chat.global.out", json.toString());
             perms.playerRemove(p, "sleepmost.exempt");
         } else {
             afkPlayers.add(p);
@@ -423,8 +423,8 @@ public class Main extends JavaPlugin implements Listener {
             afkList.addAll(afkPlayers.stream().map(Player::getName).distinct().collect(Collectors.toList()));
             jedis.set("minecraft.afkplayers", String.join(",", afkList));
             jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk");
-            msg.put("afk", "true");
-            jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
+            json.put("afk", true);
+            jedis.publish("minecraft.chat.global.out", json.toString());
             perms.playerAdd(p, "sleepmost.exempt");
         }
         jedis.set("minecraft.afkplayers",
@@ -436,9 +436,9 @@ public class Main extends JavaPlugin implements Listener {
         String name = p.getName();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
 		jedis.auth(Main.plugin.getConfig().getString("redispass"));
-		HashMap<String, String> msg = new HashMap<String, String>();
-		msg.put("type", "afk");
-		msg.put("name", name);
+		JSONObject json = new JSONObject();
+		json.put("type", "afk");
+		json.put("name", name);
 
         if (afk && !afkPlayers.contains(p)) {
             afkPlayers.add(p);
@@ -447,8 +447,8 @@ public class Main extends JavaPlugin implements Listener {
             jedis.set("minecraft.afkplayers", String.join(",", afkList));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
-                msg.put("afk", "true");
-            	jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
+                json.put("afk", true);
+            	jedis.publish("minecraft.chat.global.out", json.toString());
             }
             perms.playerAdd(p, "sleepmost.exempt");
         } else if (!afk && afkPlayers.contains(p)) {
@@ -460,8 +460,8 @@ public class Main extends JavaPlugin implements Listener {
             jedis.set("minecraft.afkplayers", String.join(",", afkList));
             if (verbose) {
                 jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
-                msg.put("afk", "false");
-            	jedis.publish("minecraft.chat.global.out", new JSONObject(msg).toString());
+                json.put("afk", false);
+            	jedis.publish("minecraft.chat.global.out", json.toString());
             }
             perms.playerRemove(p, "sleepmost.exempt");
         }
