@@ -173,14 +173,11 @@ public class Colors {
 		TextComponent txt = new TextComponent();
 		String[] letters = text.split("");
 
-		float theta = 0;
-		double delta = 360 / text.length();
 		for (int i = 0; i < text.length(); i++) {
 			TextComponent letter = new TextComponent();
-			letter.setColor(ChatColor.of(Color.getHSBColor(theta, 100, 50)));
+			letter.setColor(ChatColor.of(Color.getHSBColor(((float) i) / text.length(), 1f, 0.5f)));
 			letter.setText(letters[i]);
 			txt.addExtra(letter);
-			theta += delta;
 		}
 
 		return txt;
