@@ -157,4 +157,8 @@ public class Colors {
 		return format(text).toPlainText();
 	}
 
+	public static String rainbow(String text) {
+		return text;
+	}
+
 }
