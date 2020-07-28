@@ -20,7 +20,10 @@ public class Colors {
 			if (texts[i].equalsIgnoreCase("&")) {
 				i++;
 
-				if (texts[i].charAt(0) == '#') {
+				if(texts[i].startsWith("#rainbow")) {
+					// finalText.append(rainbow(texts[i].substring(0, 8)) + texts[i].substring(8));
+
+				} else if (texts[i].charAt(0) == '#') {
 					lastColor = ChatColor.of(texts[i].substring(0, 7));
 					txt.setColor(lastColor);
 					txt.setText(texts[i].substring(7));
@@ -65,6 +68,10 @@ public class Colors {
 
 	public static String strip(String text) {
 		return format(text).toPlainText();
+	}
+
+	public static String rainbow(String text) {
+		return text;
 	}
 
 }
