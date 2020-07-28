@@ -179,6 +179,7 @@ public class Colors {
 			TextComponent letter = new TextComponent();
 			letter.setColor(ChatColor.of(Color.getHSBColor(theta, 100, 50)));
 			letter.setText(letters[i]);
+			txt.addExtra(letter);
 			theta += delta;
 		}
 
