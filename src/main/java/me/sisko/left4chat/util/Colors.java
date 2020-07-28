@@ -9,33 +9,123 @@ public class Colors {
 
 	public static TextComponent format(String text) {
 
+		/*
+		 * Split the string into a list of & symbols and the characters between them
+		 * i.e. &8[Left&44&6O&ew&2n&3e&9r&5]&4 test becomes [&, 8[Left, &, 44, &, 6O, &,
+		 * ew, &, 2n, &, 3e, &, 9r, &, 5], &, 4 test]
+		 */
+
 		String[] texts = text.split(String.format(WITH_DELIMITER, "&"));
+
+		System.out.println(text);
+		System.out.println(String.join(", ", texts));
 
 		TextComponent finalText = new TextComponent();
 		ChatColor lastColor = ChatColor.RESET;
 
+		boolean obfuscated = false;
+		boolean bold = false;
+		boolean strikethrough = false;
+		boolean underlined = false;
+		boolean italic = false;
+
 		for (int i = 0; i < texts.length; i++) {
 			TextComponent txt = new TextComponent();
 
-			if (texts[i].equalsIgnoreCase("&")) {
+			// when encountering a & character that is followed by a string
+			if (texts[i].equalsIgnoreCase("&") && i + 1 < texts.length) {
+				// skip this & character
 				i++;
 
-				if (texts[i].charAt(0) == '#') {
+				// if the next character is &, just add the string normally, since "&&" is
+				// effectively an escape character
+				if (texts[i].charAt(0) == '&') {
+					txt.setText(texts[i]);
+					txt.setColor(lastColor);
+
+					// if the length is >= 7, and the next character is #, parse it as a hex color
+				} else if (texts[i].length() >= 7 && texts[i].charAt(0) == '#') {
 					lastColor = ChatColor.of(texts[i].substring(0, 7));
 					txt.setColor(lastColor);
 					txt.setText(texts[i].substring(7));
 
-					//finalText.append(ChatColor.of(texts[i].substring(0, 7)) + texts[i].substring(7));
+					// reset formatting
+					obfuscated = false;
+					bold = false;
+					strikethrough = false;
+					underlined = false;
+					italic = false;
+
+					// finalText.append(ChatColor.of(texts[i].substring(0, 7)) +
+					// texts[i].substring(7));
+
+					// by default, attempt to translate the legacy color code.
 				} else {
-					lastColor = ChatColor.getByChar(texts[i].charAt(0));
-					txt.setColor(lastColor);
-					txt.setText(texts[i].substring(1));
-					//finalText.append(ChatColor.translateAlternateColorCodes('&', "&" + texts[i]));
+					if (ChatColor.ALL_CODES.contains(texts[i].substring(0, 1))) { // if valid color code
+						// format the text correctly, then append
+						switch (texts[i].toLowerCase().charAt(0)) {
+							case 'k':
+								obfuscated = true;
+								break;
+							case 'l':
+								bold = true;
+								break;
+							case 'm':
+								strikethrough = true;
+								break;
+							case 'n':
+								underlined = true;
+								break;
+							case 'o':
+								italic = true;
+								break;
+							case 'r':
+								lastColor = ChatColor.RESET;
+								obfuscated = false;
+								bold = false;
+								strikethrough = false;
+								underlined = false;
+								italic = false;
+								break;
+							default:
+								lastColor = ChatColor.getByChar(texts[i].charAt(0));
+								obfuscated = false;
+								bold = false;
+								strikethrough = false;
+								underlined = false;
+								italic = false;
+								break;
+						}
+						txt.setColor(lastColor);
+						txt.setText(texts[i].substring(1));
+
+					// if color code is invalid, add back the & symbol
+					} else {
+						txt.setColor(lastColor);
+						txt.setText("&" + texts[i]);
+					}
+					// finalText.append(ChatColor.translateAlternateColorCodes('&', "&" +
+					// texts[i]));
 				}
+				txt.setObfuscated(obfuscated);
+				txt.setBold(bold);
+				txt.setStrikethrough(strikethrough);
+				txt.setUnderlined(underlined);
+				txt.setItalic(italic);
+
 				finalText.addExtra(txt);
+
+				// if no & character, or & character is trailing
 			} else {
 				txt.setText(texts[i]);
 				txt.setColor(lastColor);
+
+				txt.setObfuscated(obfuscated);
+				txt.setBold(bold);
+				txt.setStrikethrough(strikethrough);
+				txt.setUnderlined(underlined);
+				txt.setItalic(italic);
+
 				finalText.addExtra(txt);
 			}
 		}
@@ -59,7 +149,7 @@ public class Colors {
 				return formatted;
 			}
 		}
-		
+
 		return format(message);
 	}
 
