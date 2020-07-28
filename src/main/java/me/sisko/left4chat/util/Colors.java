@@ -64,7 +64,7 @@ public class Colors {
 	}
 
 	public static String strip(String text) {
-		return format(text).getText();
+		return format(text).toPlainText();
 	}
 
 }
