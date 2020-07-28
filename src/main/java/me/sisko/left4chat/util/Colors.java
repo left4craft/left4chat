@@ -3,6 +3,7 @@ package me.sisko.left4chat.util;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.TextComponent;
+import java.awt.Color;
 
 public class Colors {
 	static public final String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
@@ -42,6 +43,11 @@ public class Colors {
 				if (texts[i].charAt(0) == '&') {
 					txt.setText(texts[i]);
 					txt.setColor(lastColor);
+
+					
+				} else if (texts[i].startsWith("!rainbow")) {
+
+					txt.addExtra(rainbow(texts[i].substring(8)));
 
 					// if the length is >= 7, and the next character is #, parse it as a hex color
 				} else if (texts[i].length() >= 7 && texts[i].charAt(0) == '#') {
@@ -157,8 +163,18 @@ public class Colors {
 		return format(text).toPlainText();
 	}
 
-	public static String rainbow(String text) {
-		return text;
+	public static TextComponent rainbow(String text) {
+		TextComponent txt = new TextComponent();
+		String[] letters = text.split("");
+
+		for (int i = 1; i <= text.length(); i++) {
+			TextComponent letter = new TextComponent();
+			letter.setColor(ChatColor.of(Color.getHSBColor(365 / i, 100, 50)));
+			letter.setText(letters[i - 1]);
+			txt.addExtra(letter);
+		}
+
+		return txt;
 	}
 
 }
