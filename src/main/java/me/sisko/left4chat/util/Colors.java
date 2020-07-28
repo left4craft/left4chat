@@ -2,35 +2,48 @@
 package me.sisko.left4chat.util;
 
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class Colors {
 	static public final String WITH_DELIMITER = "((?<=%1$s)|(?=%1$s))";
 
-	public static String format(String text) {
+	public static TextComponent format(String text) {
 
 		String[] texts = text.split(String.format(WITH_DELIMITER, "&"));
 
-		StringBuilder finalText = new StringBuilder();
+		TextComponent finalText = new TextComponent();
+		ChatColor lastColor = ChatColor.RESET;
 
 		for (int i = 0; i < texts.length; i++) {
+			TextComponent txt = new TextComponent();
+
 			if (texts[i].equalsIgnoreCase("&")) {
 				i++;
 
 				if (texts[i].charAt(0) == '#') {
-					finalText.append(ChatColor.of(texts[i].substring(0, 7)) + texts[i].substring(7));
-				} else {
-					finalText.append(ChatColor.translateAlternateColorCodes('&', "&" + texts[i]));
-				}
+					lastColor = ChatColor.of(texts[i].substring(0, 7));
+					txt.setColor(lastColor);
+					txt.setText(texts[i].substring(7));
 
+					//finalText.append(ChatColor.of(texts[i].substring(0, 7)) + texts[i].substring(7));
+				} else {
+					lastColor = ChatColor.getByChar(texts[i].charAt(0));
+					txt.setColor(lastColor);
+					txt.setText(texts[i].substring(1));
+					//finalText.append(ChatColor.translateAlternateColorCodes('&', "&" + texts[i]));
+				}
+				finalText.addExtra(txt);
 			} else {
-				finalText.append(texts[i]);
+				txt.setText(texts[i]);
+				txt.setColor(lastColor);
+				finalText.addExtra(txt);
 			}
 		}
 
-		return finalText.toString();
+		return finalText;
 	}
 
-	public static String formatWithPerm(boolean formatPerm, boolean colorPerm, String message) {
+	public static TextComponent formatWithPerm(boolean formatPerm, boolean colorPerm, String message) {
 
 		if (!formatPerm) {
 			if (colorPerm) {
@@ -41,7 +54,9 @@ public class Colors {
 					}
 				}
 			} else {
-				return ChatColor.stripColor(format(message));
+				TextComponent formatted = format(message);
+				formatted.setColor(ChatColor.RESET);
+				return formatted;
 			}
 		}
 		
@@ -49,7 +64,7 @@ public class Colors {
 	}
 
 	public static String strip(String text) {
-		return ChatColor.stripColor(format(text));
+		return format(text).getText();
 	}
 
 }

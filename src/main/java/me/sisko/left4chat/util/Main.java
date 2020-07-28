@@ -28,8 +28,8 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
-import net.md_5.bungee.api.chat.hover.content.Content;
 import net.md_5.bungee.api.chat.hover.content.Text;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
@@ -230,21 +230,22 @@ public class Main extends JavaPlugin implements Listener {
         if (name == null) {
             name = e.getPlayer().getName();
         }
-        name = Colors.format(name);
-        HashMap<String, String> chatMessage = new HashMap<String, String>();
+        //name = Colors.format(name);
+        JSONObject chatMessage = new JSONObject();
         chatMessage.put("type", "chat");
         chatMessage.put("uuid", e.getPlayer().getUniqueId().toString());
         chatMessage.put("name", e.getPlayer().getName());
         chatMessage.put("nick", name);
         chatMessage.put("prefix", chat.getPlayerPrefix(e.getPlayer()));
         chatMessage.put("webhook_name", "[" + group + "] " + Colors.strip(name));
-        chatMessage.put("content", Colors.strip(e.getMessage()));
-        chatMessage.put("content_color", Colors.formatWithPerm(perms.has(e.getPlayer(), "left4chat.format"),
-                perms.has(e.getPlayer(), "left4chat.color"), e.getMessage()));
-        chatMessage.put("timestamp", Long.toString(System.currentTimeMillis()));
+        chatMessage.put("content_stripped", Colors.strip(e.getMessage()));
+        chatMessage.put("content", e.getMessage());
+        chatMessage.put("color", perms.has(e.getPlayer(), "left4chat.color"));
+        chatMessage.put("format", perms.has(e.getPlayer(), "left4chat.format"));
+        chatMessage.put("timestamp", System.currentTimeMillis());
 
         if (!e.isCancelled()) {
-            j.publish("minecraft.chat", new JSONObject(chatMessage).toString());
+            j.publish("minecraft.chat", chatMessage.toString());
             // String message = e.getMessage();
 
             // j.publish("minecraft.chat.global.in",
@@ -252,7 +253,7 @@ public class Main extends JavaPlugin implements Listener {
             // + " "
             // + Colors.formatWithPerm(perms.has(e.getPlayer(), "left4chat.format"),
             // perms.has(e.getPlayer(), "left4chat.color"), message));
-            // e.setCancelled(true);
+            e.setCancelled(true);
 
         }
 
@@ -333,29 +334,56 @@ public class Main extends JavaPlugin implements Listener {
 
                     try {
                         JSONObject json = new JSONObject(message);
+                        boolean color = json.has("color") ? json.getBoolean("color") : false;
+                        boolean format = json.has("format") ? json.getBoolean("format") : false;
 
                         if (json.getString("type").equals("raw")) {
-                            Main.this.getServer().broadcastMessage(Colors.format(json.getString("content")));
+                            //Main.this.getServer().broadcastMessage(Colors.format(json.getString("content")).toLegacyText());
+                            Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(Colors.format(json.getString("content"))));
+
                         } else if (json.getString("type").equals("pm")) {
                             Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + " -> "
                                     + json.getString("to_name") + "] " + json.getString("content"));
 
                             Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
                             if (reciever != null)
-                                reciever.sendMessage(ChatColor.translateAlternateColorCodes((char) '&',
+                                reciever.sendMessage(Colors.format(
                                         "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r "
                                                 + json.getString("content")));
 
                         } else if (json.getString("type").equals("chat")) {
-                            TextComponent chatMessage = new TextComponent(json.getString("prefix") + json.getString("nick") + ChatColor.RESET + " " + json.getString("content_color"));
+                            ComponentBuilder messageContent = new ComponentBuilder();
                             String hover = ChatColor.GOLD + "Realname: " + ChatColor.RED + json.getString("name") + "\n";
-                            hover += ChatColor.GOLD + " Timestamp: " + ChatColor.RED + new Timestamp(Long.parseLong(json.getString("timestamp"))).toString() + "\n";
+                            hover += ChatColor.GOLD + "Timestamp: " + ChatColor.RED + new Timestamp(json.getLong("timestamp")).toString() + "\n";
                             hover += ChatColor.GREEN + "Click to message!";
-                            chatMessage.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new Text(hover)));
-                            chatMessage.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "msg " + json.getString("name") + " "));
-                            Bukkit.broadcast(chatMessage);
+                            
+                            TextComponent username = Colors.format(json.getString("prefix") + json.getString("nick") + " ");
+                            username.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new Text(hover)));
+                            username.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/msg " + json.getString("name") + " "));
+                            // TextComponent messageContent = new TextComponent(json.getString("content_color"));
+                            // messageContent.setClickEvent(null);
+                            // messageContent.setHoverEvent(null);
+                            // username.addExtra(messageContent);
+
+                            messageContent.append(username);
+                            messageContent.append(Colors.formatWithPerm(format, color, json.getString("content")), FormatRetention.NONE);
+                            Bukkit.broadcast(messageContent.create());
+                        } else if (json.getString("type").equals("discord_chat")) {
+                            ComponentBuilder messageContent = new ComponentBuilder();
+                            String hover = ChatColor.GOLD + "Discord username: " + ChatColor.RED + json.getString("discord_username") + "\n";
+                            hover += ChatColor.GOLD + "Timestamp: " + ChatColor.RED + new Timestamp(json.getLong("timestamp")).toString() + "\n";
+                            hover += ChatColor.GREEN + "Click to tag on Discord.";
+
+                            TextComponent username = Colors.format(json.getString("discord_prefix"));
+                            username.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new Text(hover)));
+                            username.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "<@" + json.getString("discord_id") + "> "));
+
+                            messageContent.append(username);
+                            messageContent.append(Colors.formatWithPerm(format, color, json.getString("content")), FormatRetention.NONE);
+                            Bukkit.broadcast(messageContent.create());
+
                         } else if (json.getString("type").equals("afk")) {
-                            Main.this.getServer().broadcastMessage(Colors.format("&7 * " + json.getString("name") + (json.getBoolean("afk") ? " is now" : " is no longer") + " afk"));
+                          Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(Colors.format("&7 * " + json.getString("name") + (json.getBoolean("afk") ? " is now" : " is no longer") + " afk")));
                         } else if (json.getString("type").equals("welcome")) {
                             Main.this.getServer().broadcastMessage(ChatColor.LIGHT_PURPLE + json.getString("name") + " has joined Left4Craft for the first time!");
                         }

@@ -126,8 +126,8 @@ implements CommandExecutor {
         Permission perms = Main.plugin.getPerms();
 
 		
-		message = Colors.formatWithPerm(perms.has(p, "left4chat.format"), 
-		perms.has(p, "left4chat.color"), message);
+		//message = Colors.formatWithPerm(perms.has(p, "left4chat.format"), 
+		//perms.has(p, "left4chat.color"), message);
 
         Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
@@ -172,13 +172,17 @@ implements CommandExecutor {
             }
 
             JSONObject json = new JSONObject();
+            json.put("type", "pm");
             json.put("from", p.getUniqueId().toString());
             json.put("to", uuid);
             json.put("from_name", p.getName());
             json.put("from_nick", from_nick);
             json.put("to_name", name);
             json.put("to_nick", nick);
-            json.put("message", message);
+            json.put("content", message);
+            json.put("content_stripped", Colors.strip(message));
+            json.put("color", perms.has(p, "left4chat.color"));
+            json.put("format", perms.has(p, "left4chat.format"));
             j.publish("minecraft.chat", json.toString());
             j.close();
             return;
