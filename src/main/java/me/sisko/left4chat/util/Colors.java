@@ -18,8 +18,8 @@ public class Colors {
 
 		String[] texts = text.split(String.format(WITH_DELIMITER, "&"));
 
-		System.out.println(text);
-		System.out.println(String.join(", ", texts));
+		//System.out.println(text);
+		//System.out.println(String.join(", ", texts));
 
 		TextComponent finalText = new TextComponent();
 		ChatColor lastColor = ChatColor.RESET;
