@@ -175,7 +175,7 @@ public class Colors {
 
 		for (int i = 0; i < text.length(); i++) {
 			TextComponent letter = new TextComponent();
-			letter.setColor(ChatColor.of(Color.getHSBColor(((float) i) / text.length(), 1f, 0.5f)));
+			letter.setColor(ChatColor.of(Color.getHSBColor(((float) i) / text.length(), 0.95f, 0.85f)));
 			letter.setText(letters[i]);
 			txt.addExtra(letter);
 		}
