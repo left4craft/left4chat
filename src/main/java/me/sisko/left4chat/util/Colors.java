@@ -44,7 +44,7 @@ public class Colors {
 					txt.setText(texts[i]);
 					txt.setColor(lastColor);
 
-					
+
 				} else if (texts[i].startsWith("!rainbow")) {
 
 					txt.addExtra(rainbow(texts[i].substring(8)));
@@ -105,7 +105,7 @@ public class Colors {
 						txt.setColor(lastColor);
 						txt.setText(texts[i].substring(1));
 
-					// if color code is invalid, add back the & symbol
+						// if color code is invalid, add back the & symbol
 					} else {
 						txt.setColor(lastColor);
 						txt.setText("&" + texts[i]);
@@ -143,8 +143,14 @@ public class Colors {
 
 		if (!formatPerm) {
 			if (colorPerm) {
-				String[] formats = { "&l", "&k", "&m", "&n", "&o" };
-				for (String format : formats) {
+				String[] formats = {
+					"&l",
+					"&k",
+					"&m",
+					"&n",
+					"&o"
+				};
+				for (String format: formats) {
 					while (message.contains(format)) {
 						message = message.replace(format, "");
 					}
@@ -167,11 +173,13 @@ public class Colors {
 		TextComponent txt = new TextComponent();
 		String[] letters = text.split("");
 
-		for (int i = 1; i <= text.length(); i++) {
+		float theta = 0;
+		double delta = 360 / text.length();
+		for (int i = 0; i < text.length(); i++) {
 			TextComponent letter = new TextComponent();
-			letter.setColor(ChatColor.of(Color.getHSBColor(365 / i, 100, 50)));
-			letter.setText(letters[i - 1]);
-			txt.addExtra(letter);
+			letter.setColor(ChatColor.of(Color.getHSBColor(theta, 100, 50)));
+			letter.setText(letters[i]);
+			theta += delta;
 		}
 
 		return txt;
