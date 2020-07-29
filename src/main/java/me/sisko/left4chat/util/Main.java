@@ -15,6 +15,7 @@ import me.sisko.left4chat.commands.MessageTabComplete;
 import me.sisko.left4chat.commands.ReloadCommand;
 import me.sisko.left4chat.commands.ReplyCommand;
 import me.sisko.left4chat.commands.VerifyCommand;
+import me.sisko.left4chat.commands.ListCommand;
 import me.sisko.left4chat.sql.AsyncKeepAlive;
 import me.sisko.left4chat.sql.AsyncUserUpdate;
 import me.sisko.left4chat.sql.SQLManager;
@@ -89,6 +90,7 @@ public class Main extends JavaPlugin implements Listener {
         this.getCommand("verify").setExecutor(new VerifyCommand());
         this.getCommand("chatlock").setExecutor(new LockdownCommand());
         this.getCommand("chatreload").setExecutor(new ReloadCommand());
+        this.getCommand("list").setExecutor(new ListCommand());
 
         moveTimes = new HashMap<Player, Long>();
         warnings = new HashMap<Player, Integer>();
@@ -353,9 +355,9 @@ public class Main extends JavaPlugin implements Listener {
 
                         } else if (json.getString("type").equals("chat")) {
                             ComponentBuilder messageContent = new ComponentBuilder();
-                            String hover = ChatColor.GOLD + "Realname: " + ChatColor.RED + json.getString("name") + "\n";
-                            hover += ChatColor.GOLD + "Timestamp: " + ChatColor.RED + new Timestamp(json.getLong("timestamp")).toString() + "\n";
-                            hover += ChatColor.GREEN + "Click to message!";
+                            String hover = ChatColor.BLUE + "Realname:\n" + ChatColor.GRAY + json.getString("name") + "\n";
+                            hover += ChatColor.BLUE + "Timestamp:\n" + ChatColor.GRAY + new Timestamp(json.getLong("timestamp")).toString() + "\n";
+                            hover += ChatColor.DARK_AQUA + "Click to message";
                             
                             TextComponent username = Colors.format(json.getString("prefix") + json.getString("nick") + " ");
                             username.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new Text(hover)));
@@ -370,9 +372,9 @@ public class Main extends JavaPlugin implements Listener {
                             Bukkit.broadcast(messageContent.create());
                         } else if (json.getString("type").equals("discord_chat")) {
                             ComponentBuilder messageContent = new ComponentBuilder();
-                            String hover = ChatColor.GOLD + "Discord username: " + ChatColor.RED + json.getString("discord_username") + "\n";
-                            hover += ChatColor.GOLD + "Timestamp: " + ChatColor.RED + new Timestamp(json.getLong("timestamp")).toString() + "\n";
-                            hover += ChatColor.GREEN + "Click to tag on Discord.";
+                            String hover = ChatColor.BLUE + "Discord username:\n" + ChatColor.GRAY + json.getString("discord_username") + "\n";
+                            hover += ChatColor.BLUE + "Timestamp:\n" + ChatColor.GRAY + new Timestamp(json.getLong("timestamp")).toString() + "\n";
+                            hover += ChatColor.DARK_AQUA + "Click to tag on Discord";
 
                             TextComponent username = Colors.format(json.getString("discord_prefix"));
                             username.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, new Text(hover)));
@@ -422,7 +424,7 @@ public class Main extends JavaPlugin implements Listener {
         setAFK(p, !isAFK(p), true);
     }
 
-    private boolean isAFK(Player p) {
+    public boolean isAFK(Player p) {
         String uuid = p.getUniqueId().toString();
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
         jedis.auth(Main.plugin.getConfig().getString("redispass"));
