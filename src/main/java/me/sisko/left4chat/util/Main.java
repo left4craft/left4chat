@@ -32,6 +32,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
 import net.md_5.bungee.api.chat.HoverEvent.Action;
 import net.md_5.bungee.api.chat.hover.content.Text;
+import net.luckperms.api.LuckPerms;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
@@ -65,12 +66,14 @@ import redis.clients.jedis.JedisPubSub;
 public class Main extends JavaPlugin implements Listener {
     public static Main plugin;
     private static Connection connection;
+    private static LuckPerms luck;
     private static Permission perms;
     private static Chat chat;
     private static HashMap<Player, Long> moveTimes;
     private static HashMap<Player, Integer> warnings;
 
     static {
+		luck = null;
         perms = null;
         chat = null;
     }
@@ -93,12 +96,20 @@ public class Main extends JavaPlugin implements Listener {
         this.getCommand("list").setExecutor(new ListCommand());
 
         moveTimes = new HashMap<Player, Long>();
-        warnings = new HashMap<Player, Integer>();
+		warnings = new HashMap<Player, Integer>();
+		
         RegisteredServiceProvider<Permission> rspPerm = this.getServer().getServicesManager()
                 .getRegistration(Permission.class);
-        perms = (Permission) rspPerm.getProvider();
-        RegisteredServiceProvider<Chat> rspChat = this.getServer().getServicesManager().getRegistration(Chat.class);
-        chat = (Chat) rspChat.getProvider();
+		perms = (Permission) rspPerm.getProvider();
+		
+		RegisteredServiceProvider <LuckPerms> rspLuck = Bukkit.getServicesManager()
+				.getRegistration(LuckPerms.class);
+		luck = rspLuck.getProvider();
+
+		RegisteredServiceProvider<Chat> rspChat = this.getServer().getServicesManager()
+				.getRegistration(Chat.class);
+		chat = (Chat) rspChat.getProvider();
+		
         InventoryGUI.setup();
         connection = SQLManager.connect();
         new AsyncKeepAlive(connection).runTaskTimerAsynchronously((Plugin) this, 0L, 72000L);
@@ -345,13 +356,28 @@ public class Main extends JavaPlugin implements Listener {
 
                         } else if (json.getString("type").equals("pm")) {
                             Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + " -> "
-                                    + json.getString("to_name") + "] " + json.getString("content"));
+									+ json.getString("to_name") + "] " + json.getString("content"));
+									
+							TextComponent msg = new TextComponent();
+							TextComponent sender = new TextComponent();
+							Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
+							
+							msg.addExtra(Colors.format("&c[&6"));
+							sender.addExtra(Colors.format(json.getString("from_nick")));
 
-                            Player reciever = Bukkit.getPlayer(UUID.fromString(json.getString("to")));
-                            if (reciever != null)
-                                reciever.sendMessage(Colors.format(
-                                        "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r "
-                                                + json.getString("content")));
+							sender.setHoverEvent(new HoverEvent(Action.SHOW_TEXT, 
+								new Text(ChatColor.GREEN + "Click to reply to " + ChatColor.RESET + json.getString("from_nick"))));
+							sender.setClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, 
+								"/msg " + json.getString("from_name") + " "));
+
+							msg.addExtra(sender);							
+							msg.addExtra(Colors.format(" &c-> &6You&c]&r " + json.getString("content")));
+
+							if (reciever != null)
+								reciever.sendMessage(msg);
+                                // reciever.sendMessage(Colors.format(
+                                //         "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r "
+                                //                 + json.getString("content")));
 
                         } else if (json.getString("type").equals("chat")) {
                             ComponentBuilder messageContent = new ComponentBuilder();
@@ -418,6 +444,10 @@ public class Main extends JavaPlugin implements Listener {
 
     public Permission getPerms() {
         return perms;
+	}
+	
+	public LuckPerms getLuck() {
+        return luck;
     }
 
     public void toggleAfk(Player p) {
