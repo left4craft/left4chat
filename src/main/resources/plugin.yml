@@ -36,4 +36,7 @@ commands:
   chatreload:
     description: Reloads the Left4Chat plugin
     usage: /chatreload
+  list:
+    description: List online players
+    usage: /list
     
