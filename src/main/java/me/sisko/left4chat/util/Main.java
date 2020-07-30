@@ -421,11 +421,10 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public void toggleAfk(Player p) {
-        setAFK(p, !isAFK(p), true);
+        setAFK(p, !isAFK(p.getUniqueId().toString()), true);
     }
 
-    public boolean isAFK(Player p) {
-        String uuid = p.getUniqueId().toString();
+    public boolean isAFK(String uuid) {
         Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
         jedis.auth(Main.plugin.getConfig().getString("redispass"));
         String jsonStr = jedis.get("minecraft.afk");
