@@ -51,7 +51,11 @@ public class Colors {
 
 					// if the length is >= 7, and the next character is #, parse it as a hex color
 				} else if (texts[i].length() >= 7 && texts[i].charAt(0) == '#') {
-					lastColor = ChatColor.of(texts[i].substring(0, 7));
+					try {
+						lastColor = ChatColor.of(texts[i].substring(0, 7));
+					} catch (IllegalArgumentException e) {
+						Main.getPlugin().getLogger().warning("Attempted to translate invalid color code: " + texts[i].substring(0, 7));
+					}
 					txt.setColor(lastColor);
 					txt.setText(texts[i].substring(7));
 
