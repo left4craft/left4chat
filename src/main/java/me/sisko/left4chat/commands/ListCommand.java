@@ -18,6 +18,7 @@ import net.md_5.bungee.api.chat.hover.content.Text;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Bukkit;
 
@@ -90,14 +91,18 @@ public class ListCommand implements CommandExecutor {
 			});	
 
 		}
-
-		list.addExtra(staff);
-		list.addExtra("\n");
-		list.addExtra(nonStaff);
-		list.addExtra(Colors.format("\n\n&7To sort players by gamemode, type &e/glist"));
+		new BukkitRunnable(){
 		
-		
-		sender.sendMessage(list);
+			@Override
+			public void run() {
+				list.addExtra(staff);
+				list.addExtra("\n");
+				list.addExtra(nonStaff);
+				list.addExtra(Colors.format("\n\n&7To sort players by gamemode, type &e/glist"));
+				sender.sendMessage(list);
+						
+			}
+		}.runTaskLater(Main.plugin, 20l);
 
         return true;
 	}
