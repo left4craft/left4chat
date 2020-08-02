@@ -19,8 +19,8 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Bukkit;
+// import org.bukkit.OfflinePlayer;
+// import org.bukkit.Bukkit;
 
 import io.loyloy.nicky.Nicky;
 import net.luckperms.api.node.Node;
@@ -46,12 +46,13 @@ public class ListCommand implements CommandExecutor {
 		jedis.close();
 
 		int total = players.length();
+		int s = 0;
 
 		TextComponent list = new TextComponent();
 		TextComponent staff = new TextComponent();
 		TextComponent nonStaff = new TextComponent();
 
-		list.addExtra(Colors.format("&6There are &c" + total +" &6players online:\n"));
+		list.addExtra(Colors.format("&6There are &c" + total +" &6" + (total == 1 ? "player" : "players") + " online:\n"));
 		staff.addExtra(Colors.format("&6Staff: &r"));
 		nonStaff.addExtra(Colors.format("&6Players: &r"));
 
@@ -83,10 +84,11 @@ public class ListCommand implements CommandExecutor {
 			isStaff(UUID.fromString(uuid)).thenAcceptAsync(res -> {
 				if (res) {
 					if(pNum != 0 && pNum != total -1) nonStaff.addExtra(Colors.format(", "));
-				staff.addExtra(player);
+					staff.addExtra(player);
+					// s++;
 				} else {
 					if(pNum != 0 && pNum != total -1) nonStaff.addExtra(Colors.format(", "));
-				nonStaff.addExtra(player);
+					nonStaff.addExtra(player);
 				}
 			});	
 
@@ -95,6 +97,7 @@ public class ListCommand implements CommandExecutor {
 		
 			@Override
 			public void run() {
+				if (s == 0) staff.addExtra(Colors.format("&fTag &#7289DA@Staff &fon &#7289DADiscord &ffor help whilst no staff are online."));
 				list.addExtra(staff);
 				list.addExtra("\n");
 				list.addExtra(nonStaff);
