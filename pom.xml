@@ -69,11 +69,9 @@
 			<version>3.1.0-m3</version>
 		</dependency>
 		<dependency>
-			<groupId>nicky</groupId>
+			<groupId>io.loyloy.nicky</groupId>
 			<artifactId>Nicky</artifactId>
-			<version>0.7</version>
-			<scope>system</scope>
-			<systemPath>${project.basedir}/../depend/Nicky.jar</systemPath>
+			<version>1.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
 		<dependency>
