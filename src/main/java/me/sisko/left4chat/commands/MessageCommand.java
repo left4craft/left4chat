@@ -184,6 +184,11 @@ implements CommandExecutor {
             json.put("color", perms.has(p, "left4chat.color"));
             json.put("format", perms.has(p, "left4chat.format"));
             j.publish("minecraft.chat", json.toString());
+
+            JSONObject replies = new JSONObject(j.get("minecraft.chat.replies"));
+            replies.put(p.getName(), name);
+            j.set("minecraft.chat.replies", replies.toString());
+
             j.close();
             return;
         }
