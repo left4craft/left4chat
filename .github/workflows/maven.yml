@@ -26,3 +26,8 @@ jobs:
       run: bash setup.sh
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+    - name: 'Upload Artifact'
+      uses: actions/upload-artifact@v2
+      with:
+        name: Left4Chat.jar
+        path: target/left4chat-1.0-jar-with-dependencies.jar
