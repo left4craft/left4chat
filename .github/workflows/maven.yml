@@ -39,7 +39,7 @@ jobs:
       with:
         tag_name: ${{ github.RUN_NUMBER }}
         release_name: Left4Chat Build ${{ github.RUN_NUMBER }}
-        draft: true
+        draft: false
         prerelease: false
     - name: Upload Release Asset
       id: upload-release-asset 
