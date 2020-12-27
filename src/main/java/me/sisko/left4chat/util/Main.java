@@ -140,7 +140,7 @@ public class Main extends JavaPlugin implements Listener {
         // new AsyncFixCoins(getSQL(), e.getPlayer()).runTaskLaterAsynchronously(this,
         // 20);
         try {
-            new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
+            (new AsyncUserUpdate()).setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
         } catch (Exception e2) {
             new AsyncUserUpdate().setup(connection, e.getPlayer()).runTaskAsynchronously((Plugin) this);
         }
