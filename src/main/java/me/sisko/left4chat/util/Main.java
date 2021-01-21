@@ -298,7 +298,7 @@ public class Main extends JavaPlugin implements Listener {
             } else if (clicked != null && clicked.getType() == Material.SNOWBALL) {
                 ByteArrayDataOutput out = ByteStreams.newDataOutput();
                 out.writeUTF("Connect");
-                out.writeUTF("paintball");
+                out.writeUTF("partygames");
                 p.sendPluginMessage((Plugin) this, "BungeeCord", out.toByteArray());
             }
             p.closeInventory();

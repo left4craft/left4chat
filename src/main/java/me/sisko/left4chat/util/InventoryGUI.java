@@ -34,7 +34,7 @@ public class InventoryGUI {
         inv.setItem(4, diamond);
         ItemStack paintball = new ItemStack(Material.SNOWBALL);
         meta = paintball.getItemMeta();
-        meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Paintball");
+        meta.setDisplayName(ChatColor.GREEN + "" + ChatColor.BOLD + "Party Games");
         meta.addItemFlags(new ItemFlag[]{ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_DESTROYS, ItemFlag.HIDE_ENCHANTS, ItemFlag.HIDE_PLACED_ON, ItemFlag.HIDE_UNBREAKABLE});
         paintball.setItemMeta(meta);
         inv.setItem(6, paintball);
