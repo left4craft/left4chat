@@ -507,7 +507,7 @@ public class Main extends JavaPlugin implements Listener {
                 if (verbose) {
                     //jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is now afk.");
                     msg.put("afk", true);
-                    jedis.publish("minecraft.chat", msg.toString());
+                    //jedis.publish("minecraft.chat", msg.toString());
                 }
             }
             perms.playerAdd(p, "sleepmost.exempt");
@@ -518,7 +518,7 @@ public class Main extends JavaPlugin implements Listener {
                 if (verbose) {
                     //jedis.publish("minecraft.chat.global.in", "&7 * " + name + " is no longer afk.");
                     msg.put("afk", false);
-                    jedis.publish("minecraft.chat", msg.toString());
+                    //jedis.publish("minecraft.chat", msg.toString());
                 }
             }
             perms.playerRemove(p, "sleepmost.exempt");
