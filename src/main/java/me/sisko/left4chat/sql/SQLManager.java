@@ -15,7 +15,7 @@ public class SQLManager {
         String pass = Main.getPlugin().getConfig().getString("sql.pass");
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?autoReconnect=true&verifyServerCertificate=false&useSSL=true", user, pass);
+            return DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?autoReconnect=true", user, pass);
         }
         catch (ClassNotFoundException | SQLException e) {
             Main.getPlugin().getLogger().log(Level.SEVERE, "Could not connect to SQL database!");
