@@ -14,7 +14,7 @@ implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         
         String name = "Console";

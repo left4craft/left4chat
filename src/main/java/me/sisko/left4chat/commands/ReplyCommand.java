@@ -29,7 +29,7 @@ implements CommandExecutor {
             p.sendMessage(ChatColor.RED + "Usage: /" + label + " <message>");
         } else {
             String name = p.getName();
-            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
 
             if(j.get("minecraft.chat.replies") == null) {

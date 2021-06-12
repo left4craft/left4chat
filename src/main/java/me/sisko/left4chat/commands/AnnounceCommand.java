@@ -22,7 +22,7 @@ public class AnnounceCommand implements CommandExecutor {
             for (String arg : args) {
                 msg = String.valueOf(msg) + arg + " ";
             }
-            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
 			j.auth(Main.plugin.getConfig().getString("redispass"));
 
 			JSONObject json = new JSONObject();

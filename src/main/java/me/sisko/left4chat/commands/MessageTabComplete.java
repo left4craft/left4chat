@@ -21,7 +21,7 @@ implements TabCompleter {
         if (sender instanceof Player && args.length == 1) {
             ArrayList<String> tabComplete = new ArrayList<String>();
             ArrayList<String> uuids = new ArrayList<String>();
-            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
                 
             JSONArray players = new JSONArray(j.get("minecraft.players"));

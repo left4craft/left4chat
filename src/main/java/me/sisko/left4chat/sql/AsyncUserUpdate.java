@@ -52,7 +52,7 @@ extends BukkitRunnable {
                 String group = Main.getGroup(this.world, this.op).toLowerCase();
                 groupCommand.put("group", group.equals("guest") ? "user" : group);
 
-                Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
                 j.auth(Main.plugin.getConfig().getString("redispass"));
                         
                 j.publish("discord.botcommands", nickCommand.toString());

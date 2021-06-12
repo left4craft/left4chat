@@ -39,7 +39,7 @@ public class ListCommand implements CommandExecutor {
 
 		// Player senderPlayer = (Player) sender;
 
-		Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+		Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         jedis.auth(Main.plugin.getConfig().getString("redispass"));
 		String jsonStr = jedis.get("minecraft.players");
 		JSONArray players = new JSONArray(jsonStr);

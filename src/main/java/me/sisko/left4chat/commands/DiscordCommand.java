@@ -44,7 +44,7 @@ public class DiscordCommand implements CommandExecutor {
                         // if code is found, remove it and push change to redis
                         codes.remove(id);
 
-                        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
                         j.auth(Main.plugin.getConfig().getString("redispass"));
                         j.set("discord.synccodes", codes.toString());
                         j.close();
@@ -80,7 +80,7 @@ public class DiscordCommand implements CommandExecutor {
                 // if (discordID != null) {
                 // discordID = discordID.split("~")[0];
                 // codes.remove(args[0]);
-                // Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                // Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
                 // j.auth(Main.plugin.getConfig().getString("redispass"));
                 // j.set("discord.synccodes", new JSONObject(codes).toJSONString());
                 // new AsyncUserSave().setup(Main.getSQL(), p.getUniqueId().toString(),

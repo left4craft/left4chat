@@ -42,7 +42,7 @@ implements CommandExecutor {
                 message = String.valueOf(message) + args[i] + " ";
             }
             message = message.substring(0, message.length() - 1);
-            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
                 
             JSONArray players = new JSONArray(j.get("minecraft.players"));
@@ -129,7 +129,7 @@ implements CommandExecutor {
 		//message = Colors.formatWithPerm(perms.has(p, "left4chat.format"), 
 		//perms.has(p, "left4chat.color"), message);
 
-        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         
         JSONArray players = new JSONArray(j.get("minecraft.players"));

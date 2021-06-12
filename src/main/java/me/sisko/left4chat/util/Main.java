@@ -113,13 +113,13 @@ public class Main extends JavaPlugin implements Listener {
         InventoryGUI.setup();
         connection = SQLManager.connect();
         new AsyncKeepAlive(connection).runTaskTimerAsynchronously((Plugin) this, 0L, 72000L);
-        new CheckAFKTask().runTaskTimer((Plugin) this, 0L, 200L);
+        //new CheckAFKTask().runTaskTimer((Plugin) this, 0L, 200L);
         this.subscribe();
         ConfigManager.load();
     }
 
     public static String getCodes() {
-        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         String codes = j.get("discord.synccodes");
         j.close();
@@ -200,7 +200,7 @@ public class Main extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH)
     public void onChat(AsyncPlayerChatEvent e) {
-        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         j.auth(Main.plugin.getConfig().getString("redispass"));
         if (j.get("minecraft.lockdown") != null && j.get("minecraft.lockdown").equals("true")
                 && !perms.has(e.getPlayer(), "left4chat.verified")) {
@@ -316,7 +316,7 @@ public class Main extends JavaPlugin implements Listener {
                 p.sendMessage(ChatColor.RED + "Incorrect CAPTCHA response!");
                 p.closeInventory();
                 p.updateInventory();
-                Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
                 j.auth(Main.plugin.getConfig().getString("redispass"));
                 j.publish("minecraft.console.hub.in",
                         "kick " + e.getWhoClicked().getName() + " Incorrect CAPTCHA solution");
@@ -331,7 +331,7 @@ public class Main extends JavaPlugin implements Listener {
         Player p = (Player) e.getPlayer();
         if (VerifyCommand.playerVerifying(p)) {
             p.sendMessage(ChatColor.RED + "Kicked for incorrect CAPTCHA response!");
-            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
             j.publish("minecraft.console.hub.in", "kick " + e.getPlayer().getName() + " Incorrect CAPTCHA solution");
             j.close();
@@ -427,7 +427,7 @@ public class Main extends JavaPlugin implements Listener {
             @Override
             public void run() {
                 try {
-                    Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                    Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
                     jedis.auth(Main.plugin.getConfig().getString("redispass"));
                     jedis.subscribe(jedisPubSub, "minecraft.chat");
                     Main.this.getLogger().warning("Subscriber closed!");
@@ -455,7 +455,7 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public boolean isAFK(String uuid) {
-        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         jedis.auth(Main.plugin.getConfig().getString("redispass"));
         String jsonStr = jedis.get("minecraft.afk");
         if (jsonStr == null) {
@@ -475,7 +475,7 @@ public class Main extends JavaPlugin implements Listener {
     }
 
     public void setAFK(Player p, boolean afk, boolean verbose) {
-        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"));
+        Jedis jedis = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
         jedis.auth(Main.plugin.getConfig().getString("redispass"));
         String name = p.getName();
 

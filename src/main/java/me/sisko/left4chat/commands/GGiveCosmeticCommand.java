@@ -33,7 +33,7 @@ implements CommandExecutor {
             }
 
 
-            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"));
+            Jedis j = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
             j.auth(Main.plugin.getConfig().getString("redispass"));
             if (args.length == 2) {
                 j.publish("minecraft.console.hub.in", "givecosmetic " + args[0] + " " + args[1]);

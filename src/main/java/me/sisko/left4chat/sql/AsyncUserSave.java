@@ -54,7 +54,7 @@ public class AsyncUserSave extends BukkitRunnable {
                     command.put("oldId", oldId);
                     command.put("newId", newId);
 
-                    Jedis r = new Jedis(Main.plugin.getConfig().getString("redisip"));
+                    Jedis r = new Jedis(Main.plugin.getConfig().getString("redisip"), Main.plugin.getConfig().getInt("redisport"));
                     r.auth(Main.plugin.getConfig().getString("redispass"));
                     r.publish("discord.botcommands", command.toString());
                     r.close();
