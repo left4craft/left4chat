@@ -102,7 +102,7 @@ public class ListCommand implements CommandExecutor {
 				list.addExtra("\n");
 				list.addExtra(nonStaff);
 				list.addExtra(Colors.format("\n\n&7To sort players by gamemode, type &e/glist"));
-				sender.sendMessage(list);
+				sender.spigot().sendMessage(list);
 						
 			}
 		}.runTaskLater(Main.plugin, 20l);

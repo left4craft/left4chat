@@ -352,7 +352,7 @@ public class Main extends JavaPlugin implements Listener {
 
                         if (json.getString("type").equals("raw")) {
                             //Main.this.getServer().broadcastMessage(Colors.format(json.getString("content")).toLegacyText());
-                            Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(Colors.format(json.getString("content"))));
+                            Bukkit.getOnlinePlayers().forEach(p -> p.spigot().sendMessage(Colors.format(json.getString("content"))));
 
                         } else if (json.getString("type").equals("pm")) {
                             Main.this.getLogger().info("[MSG] [" + json.getString("from_name") + " -> "
@@ -374,7 +374,7 @@ public class Main extends JavaPlugin implements Listener {
 							msg.addExtra(Colors.format(" &c-> &6You&c]&r " + json.getString("content")));
 
 							if (reciever != null)
-								reciever.sendMessage(msg);
+								reciever.spigot().sendMessage(msg);
                                 // reciever.sendMessage(Colors.format(
                                 //         "&c[&6" + json.getString("from_nick") + " &c-> &6You&c]&r "
                                 //                 + json.getString("content")));
@@ -395,7 +395,10 @@ public class Main extends JavaPlugin implements Listener {
 
                             messageContent.append(username);
                             messageContent.append(Colors.formatWithPerm(format, color, json.getString("content")), FormatRetention.NONE);
-                            Bukkit.broadcast(messageContent.create());
+                            // Bukkit.broadcast(messageContent.create());
+
+                            Bukkit.getOnlinePlayers().forEach(p -> p.spigot().sendMessage(messageContent.create()));
+
                         } else if (json.getString("type").equals("discord_chat")) {
                             ComponentBuilder messageContent = new ComponentBuilder();
                             String hover = ChatColor.BLUE + "Discord username:\n" + ChatColor.GRAY + json.getString("discord_username") + "\n";
@@ -408,12 +411,15 @@ public class Main extends JavaPlugin implements Listener {
 
                             messageContent.append(username);
                             messageContent.append(Colors.formatWithPerm(format, color, json.getString("content")), FormatRetention.NONE);
-                            Bukkit.broadcast(messageContent.create());
+                            // Bukkit.broadcast(messageContent.create());
 
+                            Bukkit.getOnlinePlayers().forEach(p -> p.spigot().sendMessage(messageContent.create()));
+                            
                         } else if (json.getString("type").equals("afk")) {
-                          Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(Colors.format("&7 * " + json.getString("name") + (json.getBoolean("afk") ? " is now" : " is no longer") + " afk")));
+                          Bukkit.getOnlinePlayers().forEach(p -> p.spigot().sendMessage(Colors.format("&7 * " + json.getString("name") + (json.getBoolean("afk") ? " is now" : " is no longer") + " afk")));
                         } else if (json.getString("type").equals("welcome")) {
-                            Main.this.getServer().broadcastMessage(ChatColor.LIGHT_PURPLE + json.getString("name") + " has joined Left4Craft for the first time!");
+                            //Main.this.getServer().broadcastMessage(ChatColor.LIGHT_PURPLE + json.getString("name") + " has joined Left4Craft for the first time!");
+                            Bukkit.getOnlinePlayers().forEach(p -> p.sendMessage(ChatColor.LIGHT_PURPLE + json.getString("name") + " has joined Left4Craft for the first time!"));
                         }
                     } catch (JSONException e) {
                         getLogger().warning("Invalid JSON sent in minecraft.chat: " + message);

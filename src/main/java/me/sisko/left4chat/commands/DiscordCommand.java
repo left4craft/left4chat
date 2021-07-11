@@ -21,7 +21,7 @@ public class DiscordCommand implements CommandExecutor {
         if (sender instanceof Player) {
             Player p = (Player) sender;
             if (args.length == 0) {
-                p.sendMessage(Colors.format("&#7289DA[Discord&fSync&#7289DA] Join here: &b&ndiscord.left4craft.org"));
+                p.spigot().sendMessage(Colors.format("&#7289DA[Discord&fSync&#7289DA] Join here: &b&ndiscord.left4craft.org"));
             } else {
                 String jsonStr = Main.getCodes();
                 if (jsonStr == null) {
