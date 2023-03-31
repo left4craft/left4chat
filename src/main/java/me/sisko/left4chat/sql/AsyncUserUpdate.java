@@ -28,7 +28,7 @@ extends BukkitRunnable {
         this.p = p;
         this.op = Bukkit.getOfflinePlayer((UUID)p.getUniqueId());
         this.world = p.getWorld().getName();
-        this.nick = Colors.strip(p.getDisplayName());
+        this.nick = Colors.strip(p.getDisplayName()).replaceAll("§r", "");
         return this;
     }
 
