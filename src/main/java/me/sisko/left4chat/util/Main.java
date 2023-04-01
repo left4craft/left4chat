@@ -1,40 +1,10 @@
 package me.sisko.left4chat.util;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
-
-import io.loyloy.nicky.Nick;
-import me.sisko.left4chat.commands.AfkCommand;
-import me.sisko.left4chat.commands.AnnounceCommand;
-import me.sisko.left4chat.commands.DiscordCommand;
-import me.sisko.left4chat.commands.GGiveCosmeticCommand;
-import me.sisko.left4chat.commands.GameCommand;
-import me.sisko.left4chat.commands.LockdownCommand;
-import me.sisko.left4chat.commands.MessageCommand;
-import me.sisko.left4chat.commands.MessageTabComplete;
-import me.sisko.left4chat.commands.ReloadCommand;
-import me.sisko.left4chat.commands.ReplyCommand;
-import me.sisko.left4chat.commands.VerifyCommand;
-import me.sisko.left4chat.commands.ListCommand;
-import me.sisko.left4chat.sql.AsyncKeepAlive;
-import me.sisko.left4chat.sql.AsyncUserUpdate;
-import me.sisko.left4chat.sql.SQLManager;
-
 import java.sql.Connection;
 import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.UUID;
 
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
-import net.md_5.bungee.api.chat.HoverEvent.Action;
-import net.md_5.bungee.api.chat.hover.content.Text;
-import net.luckperms.api.LuckPerms;
-import net.milkbowl.vault.chat.Chat;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -60,6 +30,35 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+
+import io.loyloy.nicky.Nicky;
+import me.sisko.left4chat.commands.AfkCommand;
+import me.sisko.left4chat.commands.AnnounceCommand;
+import me.sisko.left4chat.commands.DiscordCommand;
+import me.sisko.left4chat.commands.GGiveCosmeticCommand;
+import me.sisko.left4chat.commands.GameCommand;
+import me.sisko.left4chat.commands.ListCommand;
+import me.sisko.left4chat.commands.LockdownCommand;
+import me.sisko.left4chat.commands.MessageCommand;
+import me.sisko.left4chat.commands.MessageTabComplete;
+import me.sisko.left4chat.commands.ReloadCommand;
+import me.sisko.left4chat.commands.ReplyCommand;
+import me.sisko.left4chat.commands.VerifyCommand;
+import me.sisko.left4chat.sql.AsyncKeepAlive;
+import me.sisko.left4chat.sql.AsyncUserUpdate;
+import me.sisko.left4chat.sql.SQLManager;
+import net.luckperms.api.LuckPerms;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.ComponentBuilder.FormatRetention;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.HoverEvent.Action;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+import net.milkbowl.vault.chat.Chat;
+import net.milkbowl.vault.permission.Permission;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPubSub;
 
@@ -239,7 +238,8 @@ public class Main extends JavaPlugin implements Listener {
         this.setAFK(e.getPlayer(), false, true);
         moveTimes.put(e.getPlayer(), System.currentTimeMillis());
         String group = perms.getPrimaryGroup(e.getPlayer());
-        String name = new Nick(e.getPlayer()).get();
+        String name = Nicky.getNickDatabase().downloadNick(e.getPlayer().getUniqueId().toString());
+        // String name = new Nick(e.getPlayer()).get();
         if (name == null) {
             name = e.getPlayer().getName();
         }
