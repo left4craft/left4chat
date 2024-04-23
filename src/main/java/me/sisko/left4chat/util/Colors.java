@@ -22,7 +22,7 @@ public class Colors {
 		//System.out.println(String.join(", ", texts));
 
 		TextComponent finalText = new TextComponent();
-		ChatColor lastColor = ChatColor.RESET;
+		ChatColor lastColor = null;
 
 		boolean obfuscated = false;
 		boolean bold = false;
@@ -92,7 +92,7 @@ public class Colors {
 								italic = true;
 								break;
 							case 'r':
-								lastColor = ChatColor.RESET;
+								lastColor = null;
 								obfuscated = false;
 								bold = false;
 								strikethrough = false;
@@ -163,7 +163,7 @@ public class Colors {
 				}
 			} else {
 				TextComponent formatted = format(message);
-				formatted.setColor(ChatColor.RESET);
+				formatted.setColor(null);
 				return formatted;
 			}
 		}
