@@ -1,0 +1,20 @@
+# Version catalogue. Bump a version here and the whole build picks it up.
+[versions]
+# Paper's API artifact for the 26.2 release line. Its class files are major
+# version 69 (Java 25), so the toolchain must match.
+paper = "26.2.build.112-stable"
+luckperms = "5.5"
+jedis = "8.0.0"
+hikari = "7.1.0"
+postgresql = "42.7.13"
+shadow = "9.6.1"
+
+[libraries]
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+luckperms-api = { module = "net.luckperms:api", version.ref = "luckperms" }
+jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikari" }
+postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }

@@ -1,0 +1,125 @@
+# Left4Chat -- cross-server chat for Left4Craft.
+#
+# Colour markup is the same everywhere: &0-&f and &k-&r for legacy codes,
+# &#RRGGBB for hex, &!rainbow<text> for a hue sweep, && for a literal ampersand.
+
+# This server's name as the proxy knows it.
+server-name: hub
+
+# Where players are sent when this server stops.
+fallback-server: hub
+
+# Run console commands published to minecraft.console.<server-name>.in.
+#
+# This is what the separate Left4Craft plugin used to do. It is how the captcha
+# kicks, spambot bans and Left4Hub's cosmetics grants actually reach a server,
+# so it must stay on unless you have replaced the mechanism.
+#
+# Anything that can publish to Redis can run any console command here. Every
+# relayed command is logged before it runs. Keep Redis off the public internet.
+console-relay: true
+
+redis:
+  host: 127.0.0.1
+  port: 6379
+  username: ''
+  password: ''
+  database: 0
+  timeout-millis: 2000
+  max-connections: 8
+
+  # Shared with the Velocity plugin and the Discord bot. All three have to
+  # agree, so do not change one without changing the others.
+  keys:
+    chat-channel: 'minecraft.chat'
+    bot-command-channel: 'discord.botcommands'
+    console-channel-format: 'minecraft.console.{server}.in'
+    player-list: 'minecraft.players'
+    afk: 'minecraft.afk'
+    replies: 'minecraft.chat.replies'
+    lockdown: 'minecraft.lockdown'
+    sync-codes: 'discord.synccodes'
+
+# PostgreSQL, holding the Minecraft-to-Discord account links. Same database as
+# LuckPerms and LiteBans.
+database:
+  host: localhost
+  port: 5432
+  database: postgres
+  user: postgres
+  password: ''
+  # 'verify-full' checks the certificate against the JVM trust store. Left4Chat
+  # picks the SSL factory itself, so unlike LuckPerms there is no sslfactory
+  # setting to get wrong here.
+  ssl-mode: verify-full
+  pool-size: 2
+  table: discord_users
+
+chat:
+  # Warnings an unverified player gets during a lockdown before being banned.
+  lockdown-warnings: 5
+  # Which server's console runs the kick and ban. The proxy relays it.
+  lockdown-server: hub
+  verified-permission: 'left4chat.verified'
+  color-permission: 'left4chat.color'
+  format-permission: 'left4chat.format'
+  lock-permission: 'left4chat.chatlock'
+
+afk:
+  # Seconds of inactivity before a player is marked away. 0 disables the timer,
+  # which matches the old behaviour -- the idle sweep was commented out.
+  auto-away-seconds: 0
+  # Granted while a player is away, so the sleep vote skips them.
+  exempt-permission: 'sleepmost.exempt'
+
+# The /game menu.
+selector:
+  title: 'Server Selector'
+  entries:
+    - slot: 0
+      server: hub
+      material: NETHER_STAR
+      name: '&a&lHub'
+    - slot: 2
+      server: survival
+      material: GRASS_BLOCK
+      name: '&a&lSurvival'
+    - slot: 4
+      server: creative
+      material: DIAMOND
+      name: '&a&lCreative'
+    - slot: 6
+      server: partygames
+      material: SNOWBALL
+      name: '&a&lParty Games'
+    - slot: 8
+      server: ''
+      material: BARRIER
+      name: '&c&lExit Menu'
+
+messages:
+  discord-invite: '&#7289DA[Discord&fSync&#7289DA] Join here: &b&ndiscord.left4craft.org'
+  verify-required: '&cYou must verify with &6/verify&c to message other players!'
+  verify-warning: '&cYou must verify your account with &6/verify&c before chatting or you will be &lpermbanned&r&c (Warning {warning}/{max})'
+  verified: '&aAccount Verified! You may now chat freely.'
+  captcha-failed: '&cIncorrect CAPTCHA response!'
+  captcha-closed: '&cKicked for incorrect CAPTCHA response!'
+  restarting: '&cThe server you were on is restarting, so you have been moved to hub.'
+  chat-locked: '&c&l{player}&c has locked the server chat!'
+  chat-locked-hint: '&bAll unverified guests must use &a/verify to chat'
+  chat-unlocked: '&a{player} has unlocked the server chat!'
+  first-join: '&d{player} has joined Left4Craft for the first time!'
+
+  # {count} and {players} are filled in; {players} becomes "player" or "players".
+  list-header: '&6There are &c{count} &6{players} online:'
+  list-staff: '&6Staff: &r'
+  list-players: '&6Players: &r'
+  list-no-staff: '&fTag &#7289DA@Staff &fon &#7289DADiscord &ffor help whilst no staff are online.'
+  list-footer: '&7To sort players by gamemode, type &e/glist'
+
+  # {nick} is the recipient's or sender's nickname.
+  private-message-out: '&c[&6You &c-> &6{nick}&c]&r '
+  private-message-in: '&c[&6{nick}&c -> &6You&c]&r '
+
+  # {prefix} is the LuckPerms prefix, {nick} the nickname.
+  chat-format: '{prefix}{nick} '

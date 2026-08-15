@@ -1,0 +1,35 @@
+name: Left4Chat
+version: '${version}'
+main: me.sisko.left4chat.Left4Chat
+api-version: '1.21'
+description: Cross-server chat, private messages, AFK and Discord sync for Left4Craft
+authors:
+  - Captain_Sisko
+
+# Commands are registered through Brigadier in Left4Chat#registerCommands, so
+# there is no commands: block here -- paper-plugin.yml does not accept one.
+
+dependencies:
+  server:
+    LuckPerms:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    Nicky:
+      load: BEFORE
+      required: false
+      join-classpath: true
+
+permissions:
+  left4chat.verified:
+    default: false
+    description: Chat and use /msg while chat is locked down.
+  left4chat.color:
+    default: false
+    description: Use colour codes in chat and private messages.
+  left4chat.format:
+    default: false
+    description: Use bold, italic, underline, strikethrough and obfuscated in chat.
+  left4chat.chatlock:
+    default: op
+    description: Run /chatlock.
