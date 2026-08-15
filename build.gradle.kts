@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "me.sisko"
-version = "2.0.0"
+version = "2.0.1"
 description = "Cross-server chat, private messages, AFK and Discord sync for Left4Craft"
 
 java {

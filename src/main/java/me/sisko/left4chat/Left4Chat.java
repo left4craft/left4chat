@@ -248,6 +248,8 @@ public final class Left4Chat extends JavaPlugin {
         String nickname = nicknames.plain(uuid, username);
         String group = permissions.primaryGroup(player);
 
+        boolean unranked = group.equals("guest") || group.equals("default");
+
         getServer().getScheduler().runTaskAsynchronously(this, () -> {
             OptionalLong discordId = discordLinks.findDiscordId(uuid);
             if (discordId.isEmpty()) {
@@ -265,7 +267,7 @@ public final class Left4Chat extends JavaPlugin {
             JsonObject setGroup = new JsonObject();
             setGroup.addProperty("command", "setgroup");
             setGroup.addProperty("id", id);
-            setGroup.addProperty("group", group.equals("guest") ? "user" : group);
+            setGroup.addProperty("group", unranked ? "user" : group);
 
             redis.publish(config.keys().botCommandChannel(), setUser.toString());
             redis.publish(config.keys().botCommandChannel(), setGroup.toString());
@@ -275,7 +277,7 @@ public final class Left4Chat extends JavaPlugin {
 
             getLogger().info("Linked Minecraft account " + username + " to Discord account " + id);
 
-            if ("guest".equals(group)) {
+            if (unranked) {
                 permissions.addToGroup(player, "user")
                         .thenAccept(changed -> getLogger().info("Promoted " + username + " to user."));
             }
