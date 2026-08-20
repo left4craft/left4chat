@@ -61,7 +61,7 @@ public final class ChatListener implements Listener {
 
         String username = player.getName();
         String nick = plugin.nicknames().displayName(player.getUniqueId(), username);
-        String group = plugin.permissions().primaryGroup(player);
+        String rank = plugin.permissions().rank(player);
         String prefix = plugin.permissions().prefix(player);
 
         JsonObject payload = new JsonObject();
@@ -70,7 +70,7 @@ public final class ChatListener implements Listener {
         payload.addProperty("name", username);
         payload.addProperty("nick", nick);
         payload.addProperty("prefix", prefix);
-        payload.addProperty("webhook_name", "[" + group + "] " + AmpersandColors.strip(nick));
+        payload.addProperty("webhook_name", "[" + rank + "] " + AmpersandColors.strip(nick));
         payload.addProperty("content_stripped", AmpersandColors.strip(message));
         payload.addProperty("content", message);
         payload.addProperty("color", player.hasPermission(config.chat().colorPermission()));

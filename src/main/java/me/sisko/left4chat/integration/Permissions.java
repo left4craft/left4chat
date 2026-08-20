@@ -38,6 +38,18 @@ public final class Permissions {
     }
 
     /**
+     * The display name of the player's primary group.
+     *
+     * @param player the player
+     * @return the player's rank
+     */
+    public String rank(Player player) {
+        String groupName = primaryGroup(player);
+        Group group = luckPerms.getGroupManager().getGroup(groupName);
+        return group == null ? "Guest" : group.getFriendlyName();
+    }
+
+    /**
      * The player's chat prefix as ampersand markup.
      *
      * @param player the player
